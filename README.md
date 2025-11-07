@@ -1,33 +1,16 @@
-# 🕯️ Haunted Hunt
-Juego móvil de objetos ocultos con temática de terror. Explora escenarios como librerías embrujadas y cementerios, encuentra objetos clave antes de que acabe el tiempo y desbloquea niveles cada vez más desafiantes.
+# React + Vite
 
-## 📱 Características
-- Ambientación oscura y estilo pixel art  
-- Niveles con búsqueda de objetos  
-- Temporizador y dificultad progresiva  
-- Controles simples y optimizados para móvil  
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-## 🎮 Cómo jugar
-1. Observa el escenario.  
-2. Encuentra todos los objetos indicados.  
-3. Completa el nivel antes de que el tiempo llegue a cero.  
+Currently, two official plugins are available:
 
-## 🛠️ Tecnologías
-- Android Studio  
-- Kotlin  
-- Assets en Pixel Art  
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
-## 📂 Estructura del proyecto
-```
-/app  
- ├── assets/  
- ├── java/  
- ├── res/  
- └── manifests/  
-```
+## React Compiler
 
-## 📄 Estado del proyecto
-🚧 En desarrollo – se irán agregando niveles y mecánicas nuevas.
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
 
-## 👥 Autores
-Proyecto desarrollado para el curso **Aplicaciones Móviles**.
+## Expanding the ESLint configuration
+
+If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
