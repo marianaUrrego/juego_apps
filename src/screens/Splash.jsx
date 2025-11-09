@@ -1,60 +1,38 @@
-import { useEffect } from 'react'
+import React, { useEffect } from 'react'
 
 export default function Splash({ onDone }) {
   useEffect(() => {
-    const t = setTimeout(() => onDone(), 1500)
+    const t = setTimeout(() => onDone && onDone(), 1200)
     return () => clearTimeout(t)
   }, [onDone])
 
   return (
-    <div style={styles.wrap}>
-      <div style={styles.card}>
-        <div style={styles.ghost}>👻</div>
-        <h1 style={styles.title}>Haunted Hunt</h1>
-        <div style={styles.bar}><div style={styles.fill} /></div>
-        <div style={styles.loading}>Loading...</div>
+    <div style={{
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      height: '100vh',
+      background: '#111',
+      color: '#fff'
+    }}>
+      <div style={{
+        width: 96,
+        height: 96,
+        borderRadius: 16,
+        background: '#1f1f1f',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        boxShadow: '0 0 0 1px #2a2a2a inset, 0 10px 30px rgba(0,0,0,.6)'
+      }}>
+        <span role="img" aria-label="ghost" style={{ fontSize: 42 }}>👻</span>
       </div>
+      <h1 style={{margin: '16px 0 8px'}}>Haunted Hunt</h1>
+      <div style={{ width: 200, height: 6, background: '#2a2a2a', borderRadius: 999, overflow: 'hidden' }}>
+        <div style={{ width: '65%', height: '100%', background: '#7c7c7c' }} />
+      </div>
+      <small style={{opacity:.7, marginTop: 8}}>Loading...</small>
     </div>
   )
-}
-
-const styles = {
-  wrap: {
-    width: '100vw',
-    height: '100vh',
-    background: '#141414',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  card: {
-    width: 280,
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    gap: 16,
-  },
-  ghost: {
-    width: 64,
-    height: 64,
-    borderRadius: 16,
-    background: '#1f1f1f',
-    display: 'grid',
-    placeItems: 'center',
-    fontSize: 32,
-  },
-  title: { margin: 0, fontWeight: 600 },
-  bar: {
-    width: '100%',
-    height: 6,
-    background: '#2b2b2b',
-    borderRadius: 999,
-    overflow: 'hidden',
-  },
-  fill: {
-    width: '60%',
-    height: '100%',
-    background: '#5a5a5a',
-  },
-  loading: { fontSize: 12, color: '#8a8a8a' },
 }
