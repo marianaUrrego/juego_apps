@@ -6,6 +6,8 @@ const objects = import.meta.glob('./assets/objetos/*.{png,jpg,jpeg,gif,webp,svg}
 
 const guiImages = import.meta.glob('./assets/gui/*.{png,jpg,jpeg,webp,svg}', { eager: true })
 
+import cementeryBg from './assets/backgrounds/cementery/Background 300x128.png'
+
 function mapToUrls(record) {
   return Object.values(record).map(m => m.default || m)
 }
@@ -26,4 +28,11 @@ export function getObjects(limit) {
 
 export function getGuiImages() {
   return mapToUrls(guiImages)
+}
+
+export function getLevelBackground(level) {
+  switch(level){
+    case 'cementery': return cementeryBg
+    default: return null
+  }
 }
