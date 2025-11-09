@@ -1,5 +1,7 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { getLevelSprites, getObjects, getLevelBackground } from '../assetsLoader'
+import { createEntityFromConfig } from '../entities/fromConfig'
+import { ghostConfig } from '../config/sprites/ghostConfig'
 
 function sample(arr, n) {
   const copy = [...arr]
@@ -47,7 +49,49 @@ export default function Game({ level, onPause, onEnd }) {
   }, [isCementery])
 
   const bgImage = useMemo(() => isCementery ? getLevelBackground('cementery') : null, [isCementery])
-  const grid = useMemo(() => positionsGrid(8, 3), [])
+  const grid = useMemo(() => positionsGrid(14, 5), [])
+  const canvasRef = useRef(null)
+
+  useEffect(() => {
+    if (!isCementery) return
+    const canvas = canvasRef.current
+    const ctx = canvas?.getContext?.('2d')
+    if (!canvas || !ctx) return
+
+    function fit() {
+      const parent = canvas.parentElement
+      if (!parent) return
+      const rect = parent.getBoundingClientRect()
+      canvas.width = Math.floor(rect.width)
+      canvas.height = Math.floor(rect.height)
+    }
+    fit()
+    const ro = new ResizeObserver(fit)
+    ro.observe(canvas.parentElement)
+
+    const entity = createEntityFromConfig(ghostConfig, canvas.width * 0.25, canvas.height * 0.6)
+    let dir = 1
+    const leftBound = canvas.width * 0.15
+    const rightBound = canvas.width * 0.85
+    const baseY = canvas.height * 0.6
+    let tAccum = 0
+    let last = performance.now()
+    let raf = 0
+    function loop(ts){
+      const dt = ts - last; last = ts
+      ctx.clearRect(0,0,canvas.width,canvas.height)
+      tAccum += dt
+      const input = dir > 0 ? { right: true } : { left: true }
+      entity.update(dt, input)
+      if (entity.x >= rightBound) dir = -1
+      if (entity.x <= leftBound) dir = 1
+      entity.y = baseY + Math.sin(tAccum * 0.003) * (canvas.height * 0.02)
+      entity.draw(ctx, Math.max(1, canvas.width / 300))
+      raf = requestAnimationFrame(loop)
+    }
+    raf = requestAnimationFrame(loop)
+    return () => { cancelAnimationFrame(raf); ro.disconnect() }
+  }, [isCementery])
 
   function handleClick(src) {
     if (targets.includes(src) && !found.includes(src)) {
@@ -58,6 +102,9 @@ export default function Game({ level, onPause, onEnd }) {
   }
 
   if (isCementery) {
+    const occupancy = Math.max(12, Math.floor(grid.length * 0.45))
+    const indices = useMemo(() => sample(grid.map((_, i) => i), occupancy), [grid])
+    const placed = useMemo(() => sample(items, occupancy), [items, occupancy])
     return (
       <div className="game" style={{ background: bgColor }}>
         <header className="hud">
@@ -70,15 +117,20 @@ export default function Game({ level, onPause, onEnd }) {
             {bgImage && (
               <img src={bgImage} alt="cementery-bg" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
             )}
-            {items.slice(0, grid.length).map((src, i) => (
-              <img
-                key={i}
-                src={src}
-                alt="item"
-                onClick={() => handleClick(src)}
-                style={{ position: 'absolute', transform: 'translate(-50%, -50%)', cursor: 'pointer', left: grid[i].left, top: grid[i].top, maxWidth: 64, maxHeight: 64, imageRendering: 'pixelated', filter: found.includes(src) ? 'grayscale(1) opacity(0.4)' : 'none' }}
-              />
-            ))}
+            <canvas ref={canvasRef} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }} />
+            {placed.map((src, idx) => {
+              const gi = indices[idx]
+              const pos = grid[gi]
+              return (
+                <img
+                  key={`${gi}-${idx}`}
+                  src={src}
+                  alt="item"
+                  onClick={() => handleClick(src)}
+                  style={{ position: 'absolute', transform: 'translate(-50%, -50%)', cursor: 'pointer', left: pos.left, top: pos.top, maxWidth: 64, maxHeight: 64, imageRendering: 'pixelated', filter: found.includes(src) ? 'grayscale(1) opacity(0.4)' : 'none' }}
+                />
+              )
+            })}
           </div>
           <div className="targets" style={{ marginTop: 16, display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'center' }}>
             {targets.map((src, i) => (
