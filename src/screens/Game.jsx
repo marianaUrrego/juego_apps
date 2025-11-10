@@ -2,6 +2,12 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { getLevelSprites, getObjects, getLevelBackground } from '../assetsLoader'
 import { createEntityFromConfig } from '../entities/fromConfig'
 import { ghostConfig } from '../config/sprites/ghostConfig'
+import { enemy06Config } from '../config/sprites/enemy06Config'
+import { enemy09Config } from '../config/sprites/enemy09Config'
+import { useGameStore } from '../store/gameStore'
+import { useNavigate } from 'react-router-dom'
+import { useRunHistoryStore } from '../store/runHistoryStore'
+import { useSettingsStore } from '../store/settingsStore'
 
 function sample(arr, n) {
   const copy = [...arr]
@@ -21,7 +27,31 @@ function positionsGrid(cols, rows) {
   return list
 }
 
+function preloadImages(urls) {
+  const uniq = Array.from(new Set(urls.filter(Boolean)))
+  const tasks = uniq.map((src) => new Promise((res) => {
+    const img = new Image()
+    img.onload = () => res(src)
+    img.onerror = () => res(src)
+    img.src = src
+  }))
+  return Promise.all(tasks)
+}
+
 export default function Game({ level, onPause, onEnd }) {
+  const navigate = useNavigate()
+  const timeRemaining = useGameStore(s => s.timeRemaining)
+  const status = useGameStore(s => s.status)
+  const startLevel = useGameStore(s => s.startLevel)
+  const decrement = useGameStore(s => s.decrement)
+  const setWon = useGameStore(s => s.setWon)
+  const setLost = useGameStore(s => s.setLost)
+  const resetLevel = useGameStore(s => s.resetLevel)
+  const addScore = useGameStore(s => s.addScore)
+  const nivelActual = useGameStore(s => s.nivelActual)
+  const addRun = useRunHistoryStore(s => s.addRun)
+  const difficulty = useSettingsStore(s => s.difficulty)
+
   const isCementery = level === 'cementery'
 
   const bgColor = useMemo(() => {
@@ -33,27 +63,90 @@ export default function Game({ level, onPause, onEnd }) {
     }
   }, [level])
 
-  const [targets, setTargets] = useState([])
-  const [found, setFound] = useState([])
-  const [items, setItems] = useState([])
+  const [targets, setTargets] = useState([]) // arreglo de objetos colocados elegidos como objetivos
+  const [found, setFound] = useState([])     // ids encontrados
+  const [placed, setPlaced] = useState([])   // objetos colocados en la matriz: { id, src, pos }
+  const [ready, setReady] = useState(false)
+  const [seed, setSeed] = useState(0)
 
   useEffect(() => {
     if (!isCementery) return
-    const chars = getLevelSprites('cementery')
-    const objs = getObjects()
-    const pool = sample([...chars, ...objs], 24)
-    const t = sample(pool, 6)
-    setTargets(t)
-    setFound([])
-    setItems(pool)
-  }, [isCementery])
+    let cancelled = false
+    async function setup(){
+      setReady(false)
+      const chars = getLevelSprites('cementery')
+      const objs = getObjects() // SOLO @objetos
+      // Construir matriz primero: elegir posiciones y objetos colocados
+      const occupancy = Math.max(24, Math.floor(grid.length * 0.65))
+      const indices = sample(grid.map((_, i) => i), occupancy)
+      const pool = sample(objs, Math.min(140, objs.length))
+      const chosen = sample(pool, occupancy)
+      const placedObjects = indices.map((gi, i) => ({ id: `p-${gi}-${i}`, src: chosen[i], pos: grid[gi] }))
+      // Precargar fondo + pool + sprites animados
+      const bg = getLevelBackground('cementery')
+      await preloadImages([bg, ...pool, ghostConfig.imagePath, enemy06Config.imagePath, enemy09Config.imagePath])
+      if (cancelled) return
+      // Objetivos: tomar EXCLUSIVAMENTE desde los colocados
+      const t = sample(placedObjects, 8)
+      setTargets(t)
+      setFound([])
+      setPlaced(placedObjects)
+      setReady(true)
+    }
+    setup()
+    return () => { cancelled = true }
+  }, [isCementery, seed])
 
   const bgImage = useMemo(() => isCementery ? getLevelBackground('cementery') : null, [isCementery])
-  const grid = useMemo(() => positionsGrid(14, 5), [])
+  // Matriz más grande
+  const grid = useMemo(() => positionsGrid(20, 8), [])
   const canvasRef = useRef(null)
 
+  // Timer: iniciar al estar listo el nivel
   useEffect(() => {
-    if (!isCementery) return
+    if (!ready) return
+    if (status !== 'playing') startLevel(120)
+  }, [ready])
+
+  // Intervalo de 1s mientras se juega
+  useEffect(() => {
+    if (status !== 'playing') return
+    const id = setInterval(() => decrement(), 1000)
+    return () => clearInterval(id)
+  }, [status])
+
+  // Derivar victoria por colección completa
+  useEffect(() => {
+    if (!ready || status !== 'playing') return
+    if (targets.length > 0 && found.length === targets.length) {
+      setWon()
+      const score = Math.max(0, Math.round((found.length/Math.max(1,targets.length))*700 + timeRemaining*3))
+      addScore({ id: crypto.randomUUID?.() || `${Date.now()}-win`, levelId: nivelActual, score, result: 'win', createdAt: new Date().toISOString() })
+      const timeSeconds = 120 - timeRemaining
+      addRun({ levelId: nivelActual, score, timeSeconds, difficulty, result: 'win' })
+    }
+  }, [found, targets, ready, status])
+
+  // Derivar derrota al llegar a 0 tiempo con pendientes
+  useEffect(() => {
+    if (status !== 'playing') return
+    if (timeRemaining === 0 && found.length < targets.length) {
+      setLost()
+      const score = Math.max(0, Math.round((found.length/Math.max(1,targets.length))*700))
+      addScore({ id: crypto.randomUUID?.() || `${Date.now()}-lose`, levelId: nivelActual, score, result: 'lose', createdAt: new Date().toISOString() })
+      const timeSeconds = 120
+      addRun({ levelId: nivelActual, score, timeSeconds, difficulty, result: 'lose' })
+    }
+  }, [timeRemaining, status, found, targets])
+
+  function fmt(sec){
+    const m = Math.floor(sec/60).toString().padStart(2,'0')
+    const s = Math.floor(sec%60).toString().padStart(2,'0')
+    return `${m}:${s}`
+  }
+
+  useEffect(() => {
+    if (!isCementery || !ready) return
     const canvas = canvasRef.current
     const ctx = canvas?.getContext?.('2d')
     if (!canvas || !ctx) return
@@ -69,76 +162,108 @@ export default function Game({ level, onPause, onEnd }) {
     const ro = new ResizeObserver(fit)
     ro.observe(canvas.parentElement)
 
-    const entity = createEntityFromConfig(ghostConfig, canvas.width * 0.25, canvas.height * 0.6)
-    let dir = 1
-    const leftBound = canvas.width * 0.15
-    const rightBound = canvas.width * 0.85
-    const baseY = canvas.height * 0.6
-    let tAccum = 0
+    // Múltiples entidades animadas (3 enemigos distintos)
+    const configs = [ghostConfig, enemy06Config, enemy09Config]
+    const entities = [0,1,2].map(i => {
+      const x = canvas.width * (0.2 + 0.25 * i)
+      const y = canvas.height * (0.55 + 0.04 * i)
+      const ent = createEntityFromConfig(configs[i % configs.length], x, y)
+      return { ent, dir: i % 2 === 0 ? 1 : -1, phase: Math.random() * 1000, baseY: y }
+    })
+
     let last = performance.now()
     let raf = 0
     function loop(ts){
       const dt = ts - last; last = ts
       ctx.clearRect(0,0,canvas.width,canvas.height)
-      tAccum += dt
-      const input = dir > 0 ? { right: true } : { left: true }
-      entity.update(dt, input)
-      if (entity.x >= rightBound) dir = -1
-      if (entity.x <= leftBound) dir = 1
-      entity.y = baseY + Math.sin(tAccum * 0.003) * (canvas.height * 0.02)
-      entity.draw(ctx, Math.max(1, canvas.width / 300))
+
+      const leftBound = canvas.width * 0.08
+      const rightBound = canvas.width * 0.92
+      for (const state of entities) {
+        const { ent } = state
+        const input = state.dir > 0 ? { right: true } : { left: true }
+        ent.update(dt, input)
+        if (ent.x >= rightBound) state.dir = -1
+        if (ent.x <= leftBound) state.dir = 1
+        state.phase += dt
+        ent.y = state.baseY + Math.sin(state.phase * 0.003) * (canvas.height * 0.02)
+        ent.draw(ctx, Math.max(1, canvas.width / 300))
+      }
+
       raf = requestAnimationFrame(loop)
     }
     raf = requestAnimationFrame(loop)
     return () => { cancelAnimationFrame(raf); ro.disconnect() }
-  }, [isCementery])
+  }, [isCementery, ready])
 
-  function handleClick(src) {
-    if (targets.includes(src) && !found.includes(src)) {
-      const f = [...found, src]
+  function handleClick(id) {
+    const isTarget = targets.some(t => t.id === id)
+    if (isTarget && !found.includes(id)) {
+      const f = [...found, id]
       setFound(f)
-      if (f.length === targets.length) onEnd && onEnd({ score: 100 })
+      if (f.length === targets.length) {
+        const score = Math.max(0, Math.round((f.length/Math.max(1,targets.length))*700 + timeRemaining*3))
+        onEnd && onEnd({ score })
+      }
     }
   }
 
   if (isCementery) {
-    const occupancy = Math.max(12, Math.floor(grid.length * 0.45))
-    const indices = useMemo(() => sample(grid.map((_, i) => i), occupancy), [grid])
-    const placed = useMemo(() => sample(items, occupancy), [items, occupancy])
     return (
       <div className="game" style={{ background: bgColor }}>
-        <header className="hud">
-          <button onClick={onPause}>Pausa</button>
-          <div>Escenario: <b>Cementerio</b></div>
-          <button onClick={() => onEnd({ score: (found.length/Math.max(1,targets.length))*100 })}>Terminar</button>
+        <header className="bar">
+          <div className="container">
+            <button className="back-btn" onClick={onPause}>Pausa</button>
+            <h2 className="title-md">Escenario: <b>Cementerio</b></h2>
+            <div />
+          </div>
         </header>
-        <div className="playfield" style={{ alignContent: 'start' }}>
-          <div className="scene" style={{ position: 'relative', width: 'min(960px, 95%)', aspectRatio: '300 / 128' }}>
-            {bgImage && (
-              <img src={bgImage} alt="cementery-bg" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
-            )}
-            <canvas ref={canvasRef} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }} />
-            {placed.map((src, idx) => {
-              const gi = indices[idx]
-              const pos = grid[gi]
-              return (
+        <div className="container page__body">
+          {status === 'playing' && (
+            <div style={{ position: 'absolute', top: 56, right: 'max(12px, 5%)', zIndex: 2, fontWeight: 700, padding: '6px 10px', borderRadius: 8, background: 'rgba(0,0,0,0.25)', border: '1px solid rgba(255,255,255,0.1)', color: timeRemaining <= 10 ? '#ff7575' : 'var(--c-text)' }}>
+              {fmt(timeRemaining)}
+            </div>
+          )}
+          {!ready ? (
+            <div className="panel">Cargando recursos...</div>
+          ) : (
+            <div className="scene" style={{ position: 'relative', width: 'min(960px, 95%)', aspectRatio: '300 / 128' }}>
+              {bgImage && (
+                <img src={bgImage} alt="cementery-bg" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+              )}
+              <canvas ref={canvasRef} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }} />
+              {placed.map((obj) => (
                 <img
-                  key={`${gi}-${idx}`}
-                  src={src}
+                  key={obj.id}
+                  src={obj.src}
                   alt="item"
-                  onClick={() => handleClick(src)}
-                  style={{ position: 'absolute', transform: 'translate(-50%, -50%)', cursor: 'pointer', left: pos.left, top: pos.top, maxWidth: 64, maxHeight: 64, imageRendering: 'pixelated', filter: found.includes(src) ? 'grayscale(1) opacity(0.4)' : 'none' }}
+                  onClick={() => handleClick(obj.id)}
+                  style={{ position: 'absolute', transform: 'translate(-50%, -50%)', cursor: 'pointer', left: obj.pos.left, top: obj.pos.top, maxWidth: 56, maxHeight: 56, imageRendering: 'pixelated', filter: found.includes(obj.id) ? 'grayscale(1) opacity(0.4)' : 'none' }}
                 />
-              )
-            })}
-          </div>
-          <div className="targets" style={{ marginTop: 16, display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'center' }}>
-            {targets.map((src, i) => (
-              <div key={`t-${i}`} style={{ width: 56, height: 56, borderRadius: 8, border: '1px solid #2a2a2a', background: '#121212', display: 'grid', placeItems: 'center', opacity: found.includes(src) ? 0.4 : 1 }}>
-                <img src={src} alt="target" style={{ maxWidth: 40, maxHeight: 40, objectFit: 'contain', imageRendering: 'pixelated' }} />
+              ))}
+            </div>
+          )}
+          {ready && (
+            <div className="targets" style={{ marginTop: 16, display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'center' }}>
+              {targets.map((obj, i) => (
+                <div key={obj.id} style={{ width: 56, height: 56, borderRadius: 8, border: '1px solid #2a2a2a', background: '#121212', display: 'grid', placeItems: 'center', opacity: found.includes(obj.id) ? 0.4 : 1 }}>
+                  <img src={obj.src} alt="target" style={{ maxWidth: 40, maxHeight: 40, objectFit: 'contain', imageRendering: 'pixelated' }} />
+                </div>
+              ))}
+            </div>
+          )}
+          {status === 'lost' && (
+            <div style={{ position: 'fixed', inset: 0, display: 'grid', placeItems: 'center', background: 'rgba(0,0,0,0.5)' }}>
+              <div className="panel" style={{ width: 360, textAlign: 'center', display: 'grid', gap: 12 }}>
+                <h3 style={{ margin: 0 }}>Perdiste</h3>
+                <div>Se acabó el tiempo.</div>
+                <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
+                  <button className="btn-full" onClick={() => { resetLevel(); setSeed(s=>s+1) }}>Reintentar nivel</button>
+                  <button className="btn-full" onClick={() => navigate('/')}>Volver al inicio</button>
+                </div>
               </div>
-            ))}
-          </div>
+            </div>
+          )}
         </div>
       </div>
     )

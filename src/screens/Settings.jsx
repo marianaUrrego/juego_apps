@@ -1,8 +1,14 @@
-import React, { useState } from 'react'
+import React from 'react'
+import { useSettingsStore } from '../store/settingsStore'
 
 export default function Settings({ onBack }) {
-  const [music, setMusic] = useState(0.6)
-  const [sfx, setSfx] = useState(0.8)
+  const music = useSettingsStore(s => s.volumenMusica)
+  const sfx = useSettingsStore(s => s.volumenSFX)
+  const mute = useSettingsStore(s => s.mute)
+  const setVolumenMusica = useSettingsStore(s => s.setVolumenMusica)
+  const setVolumenSFX = useSettingsStore(s => s.setVolumenSFX)
+  const toggleMute = useSettingsStore(s => s.toggleMute)
+
   return (
     <div className="page">
       <header className="bar">
@@ -12,15 +18,20 @@ export default function Settings({ onBack }) {
           <span />
         </div>
       </header>
-      <div className="container page__body" style={{ paddingBlock: 24, display: 'grid', gap: 16 }}>
-        <label>
-          Música {Math.round(music*100)}%
-          <input type="range" min={0} max={1} step={0.01} value={music} onChange={e=>setMusic(parseFloat(e.target.value))} />
-        </label>
-        <label>
-          SFX {Math.round(sfx*100)}%
-          <input type="range" min={0} max={1} step={0.01} value={sfx} onChange={e=>setSfx(parseFloat(e.target.value))} />
-        </label>
+      <div className="container page__body">
+        <div className="panel panel--form">
+          <label>
+            Música {Math.round(music*100)}%
+            <input type="range" min={0} max={1} step={0.01} value={music} onChange={e=>setVolumenMusica(parseFloat(e.target.value))} />
+          </label>
+          <label>
+            SFX {Math.round(sfx*100)}%
+            <input type="range" min={0} max={1} step={0.01} value={sfx} onChange={e=>setVolumenSFX(parseFloat(e.target.value))} />
+          </label>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <input type="checkbox" checked={mute} onChange={toggleMute} /> Mute
+          </label>
+        </div>
       </div>
     </div>
   )

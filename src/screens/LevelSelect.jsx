@@ -1,4 +1,6 @@
 import React from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useGameStore } from '../store/gameStore'
 
 const LEVELS = [
   { id: 'cementery', name: 'Cementerio', subtitle: 'Nivel 1 · Desbloqueado', unlocked: true },
@@ -6,12 +8,14 @@ const LEVELS = [
   { id: 'forest', name: 'Bosque Oscuro', subtitle: 'Nivel 3 · Bloqueado', unlocked: false },
 ]
 
-export default function LevelSelect({ onBack, onStart }) {
+export default function LevelSelect() {
+  const navigate = useNavigate()
+  const setNivelActual = useGameStore(s => s.setNivelActual)
   return (
     <div className="page level-select">
       <header className="bar level-header">
         <div className="container">
-          <div><button className="back-btn" onClick={onBack}>{'←'}</button></div>
+          <div><button className="back-btn" onClick={() => navigate(-1)}>{'←'}</button></div>
           <h2 className="title-md">Selecciona Nivel</h2>
           <span />
         </div>
@@ -32,7 +36,7 @@ export default function LevelSelect({ onBack, onStart }) {
                   {l.unlocked && <span style={{ fontSize: 18 }}>✔</span>}
                 </div>
                 <div style={{ marginTop: 12 }}>
-                  <button className="btn-full" onClick={() => !disabled && onStart(l.id)} disabled={disabled}>
+                  <button className="btn-full" onClick={() => { if (disabled) return; setNivelActual(l.id); navigate(`/game/${l.id}`) }} disabled={disabled}>
                     {disabled ? 'Bloqueado' : 'Jugar'}
                   </button>
                 </div>
