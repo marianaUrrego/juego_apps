@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import './App.css'
+import './styles/main.scss'
 import Splash from './screens/Splash'
 import MainMenu from './screens/MainMenu'
 import LevelSelect from './screens/LevelSelect'
@@ -7,7 +7,9 @@ import Game from './screens/Game'
 import Pause from './screens/Pause'
 import Results from './screens/Results'
 import Settings from './screens/Settings'
-import HowTo from './screens/HowTo'
+import Scores from './screens/Scores'
+import Credits from './screens/Credits'
+import AppLayout from './layout/AppLayout'
 
 function App() {
   const [screen, setScreen] = useState('splash')
@@ -17,16 +19,16 @@ function App() {
   const goMenu = () => setScreen('menu')
 
   return (
-    <div id="app-root">
+    <AppLayout>
       {screen === 'splash' && (
         <Splash onDone={() => setScreen('menu')} />
       )}
 
       {screen === 'menu' && (
         <MainMenu
-          onPlay={() => setScreen('game')}
-          onLevelSelect={() => setScreen('levels')}
-          onHowTo={() => setScreen('howto')}
+          onPlay={() => setScreen('levels')}
+          onScores={() => setScreen('scores')}
+          onCredits={() => setScreen('credits')}
           onSettings={() => setScreen('settings')}
         />
       )}
@@ -65,10 +67,14 @@ function App() {
         <Settings onBack={goMenu} />
       )}
 
-      {screen === 'howto' && (
-        <HowTo onBack={goMenu} />
+      {screen === 'scores' && (
+        <Scores onBack={goMenu} />
       )}
-    </div>
+
+      {screen === 'credits' && (
+        <Credits onBack={goMenu} />
+      )}
+    </AppLayout>
   )
 }
 

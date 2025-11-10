@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react'
+import logo from '../assets/logo.png'
 
 export default function Splash({ onDone }) {
   useEffect(() => {
@@ -7,32 +8,17 @@ export default function Splash({ onDone }) {
   }, [onDone])
 
   return (
-    <div style={{
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      height: '100vh',
-      background: '#111',
-      color: '#fff'
-    }}>
-      <div style={{
-        width: 96,
-        height: 96,
-        borderRadius: 16,
-        background: '#1f1f1f',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        boxShadow: '0 0 0 1px #2a2a2a inset, 0 10px 30px rgba(0,0,0,.6)'
-      }}>
-        <span role="img" aria-label="ghost" style={{ fontSize: 42 }}>👻</span>
+    <div className="screen" style={{ padding: 48 }}>
+      <div style={{ display: 'grid', gap: 16 }}>
+        <div style={{ width: 160, height: 160, borderRadius: 20, background: 'color-mix(in oklab, var(--c-1) 30%, transparent)', display: 'grid', placeItems: 'center', border: '1px solid color-mix(in oklab, var(--c-3) 30%, transparent)' }}>
+          <img src={logo} alt="logo" style={{ width: 120, height: 120, objectFit: 'contain' }} />
+        </div>
+        <h1 style={{ fontSize: 48, margin: 0 }}>Haunted Hunt</h1>
+        <div style={{ width: 260, height: 8, background: 'color-mix(in oklab, var(--c-1) 45%, transparent)', borderRadius: 999, overflow: 'hidden' }}>
+          <div style={{ width: '70%', height: '100%', background: 'var(--c-3)' }} />
+        </div>
+        <small style={{ opacity: .8 }}>Loading...</small>
       </div>
-      <h1 style={{margin: '16px 0 8px'}}>Haunted Hunt</h1>
-      <div style={{ width: 200, height: 6, background: '#2a2a2a', borderRadius: 999, overflow: 'hidden' }}>
-        <div style={{ width: '65%', height: '100%', background: '#7c7c7c' }} />
-      </div>
-      <small style={{opacity:.7, marginTop: 8}}>Loading...</small>
     </div>
   )
 }

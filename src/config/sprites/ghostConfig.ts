@@ -1,7 +1,9 @@
 import type { SpriteConfig } from './types'
 
+const ghostUrl = new URL('../../assets/backgrounds/cementery/characters/Enemy 07-1.png', import.meta.url).href
+
 export const ghostConfig: SpriteConfig = {
-  imagePath: '/src/assets/backgrounds/cementery/characters/Enemy 07-1.png',
+  imagePath: ghostUrl,
   frameWidth: 32,
   frameHeight: 32,
   rows: 4,

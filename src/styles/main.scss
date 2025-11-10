@@ -1,0 +1,284 @@
+@use './_variables.scss' as *;
+
+:root {
+  --c-bg: #{$c-bg};
+  --c-1: #{$c-1};
+  --c-2: #{$c-2};
+  --c-3: #{$c-3};
+  --c-text: #{$c-text};
+  --c-muted: #{$c-muted};
+}
+
+$bp-lg: 1200px;
+$bp-md: 900px;
+$bp-sm: 600px;
+
+.title-xl { font-size: 48px; margin: 0; }
+.title-md { font-size: 28px; margin: 0; }
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+  &:hover { filter: drop-shadow(0 0 2em #646cffaa); }
+  &.react:hover { filter: drop-shadow(0 0 2em #61dafbaa); }
+}
+
+@keyframes logo-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo { animation: logo-spin infinite 20s linear; }
+}
+
+html, body, #root, #app-root { height: 100%; }
+
+#root {
+  margin: 0;
+  padding: 0;
+  text-align: left;
+  background: var(--c-bg);
+  color: var(--c-text);
+}
+
+.card { padding: 2em; }
+.read-the-docs { color: #888; }
+
+#app-root { min-height: 100vh; padding: 0; }
+
+.screen {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 24px;
+}
+
+.centered { align-items: center; justify-content: center; }
+
+.menu {
+  display: grid;
+  gap: 12px;
+  width: 340px;
+
+  .btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 14px 16px;
+    border-radius: $radius-lg;
+    border: 1px solid color-mix(in oklab, var(--c-3) 30%, transparent);
+    color: var(--c-text);
+    background: color-mix(in oklab, var(--c-1) 30%, transparent);
+    box-shadow: none;
+
+    &--primary {
+      background: #fff;
+      color: #111;
+      font-weight: 800;
+    }
+
+    &--secondary {
+      background: color-mix(in oklab, var(--c-1) 25%, transparent);
+    }
+
+    .icon {
+      width: 18px;
+      height: 18px;
+      display: inline-grid;
+      place-items: center;
+      opacity: .9;
+    }
+  }
+}
+
+.bar {
+  display: grid;
+  grid-template-columns: 160px 1fr 160px;
+  align-items: center;
+  padding: 12px 16px;
+  background: color-mix(in oklab, var(--c-1) 30%, transparent);
+  border-bottom: 1px solid color-mix(in oklab, var(--c-3) 30%, transparent);
+}
+
+.back-btn {
+  width: 140px;
+  height: 44px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in oklab, var(--c-2) 35%, transparent);
+  color: var(--c-text);
+  border: 1px solid color-mix(in oklab, var(--c-3) 30%, transparent);
+}
+
+.page { min-height: 100vh; display: flex; flex-direction: column; }
+
+.container { width: min(1200px, 100%); margin-inline: auto; padding-inline: 24px; }
+.page__body { flex: 1; display: grid; place-items: center; }
+
+.bar .container { display: grid; grid-template-columns: 160px 1fr 160px; align-items: center; padding-block: 6px; }
+
+/* Stage: fuerza un área 16:9 centrada (mismo tamaño en todas las pantallas) */
+.stage-center { width: 100vw; height: 100vh; display: grid; place-items: center; }
+.app-stage {
+  width: min(100vw, calc(100vh * 16 / 9));
+  height: min(100vh, calc(100vw * 9 / 16));
+  display: flex; flex-direction: column;
+  background: var(--c-bg);
+  border-left: 1px solid color-mix(in oklab, var(--c-1) 25%, transparent);
+  border-right: 1px solid color-mix(in oklab, var(--c-1) 25%, transparent);
+  overflow: hidden;
+}
+.app-stage .container { width: 100%; padding-inline: 16px; }
+.app-stage .page__body { padding: 12px; }
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 16px;
+  padding: 16px;
+}
+
+.card {
+  border: 1px solid color-mix(in oklab, var(--c-2) 30%, transparent);
+  border-radius: 12px;
+  background: color-mix(in oklab, var(--c-1) 25%, transparent);
+}
+
+.game { min-height: 100vh; display: flex; flex-direction: column; }
+
+.hud {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 12px;
+  background: color-mix(in oklab, var(--c-1) 30%, transparent);
+  border-bottom: 1px solid color-mix(in oklab, var(--c-3) 30%, transparent);
+}
+
+.playfield { flex: 1; display: grid; place-items: center; padding: 16px; }
+
+.placeholder {
+  width: min(640px, 90%);
+  height: 360px;
+  border-radius: 16px;
+  border: 1px dashed color-mix(in oklab, var(--c-2) 30%, transparent);
+  display: grid;
+  place-items: center;
+  color: var(--c-muted);
+  background: color-mix(in oklab, var(--c-1) 15%, transparent);
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: color-mix(in oklab, var(--c-1) 45%, transparent);
+}
+
+.panel {
+  background: color-mix(in oklab, var(--c-1) 35%, transparent);
+  border: 1px solid color-mix(in oklab, var(--c-3) 30%, transparent);
+  border-radius: 12px;
+  padding: 20px;
+  min-width: 260px;
+  display: grid;
+  gap: 10px;
+}
+
+.panel--form { width: min(720px, 90%); padding: 24px; gap: 16px; }
+
+button {
+  background: var(--c-2);
+  color: var(--c-text);
+  border: 1px solid color-mix(in oklab, var(--c-3) 30%, transparent);
+  border-radius: 10px;
+  padding: 10px 14px;
+}
+
+button:hover { background: var(--c-3); }
+
+/* Scores */
+.scores-page { display: flex; flex-direction: column; min-height: 100vh; }
+.scores {
+  display: grid; place-items: start center; padding: 24px;
+  &__table { width: min(720px, 90%); }
+}
+.table {
+  border-radius: 14px; overflow: hidden;
+  background: color-mix(in oklab, var(--c-1) 25%, transparent);
+  border: 1px solid color-mix(in oklab, var(--c-3) 25%, transparent);
+  &__head, &__row { display: grid; grid-template-columns: 100px 1fr 120px; }
+  &__head { padding: 12px 16px; background: color-mix(in oklab, var(--c-1) 45%, transparent); opacity: .9; }
+  &__body { display: grid; }
+  &__row { padding: 12px 16px; border-top: 1px solid color-mix(in oklab, var(--c-1) 55%, transparent); align-items: center; }
+  .rank { width: 32px; height: 32px; border-radius: 50%; background: color-mix(in oklab, var(--c-1) 55%, transparent); display: grid; place-items: center; }
+  .score { text-align: right; font-weight: 700; }
+}
+
+/* Credits */
+.credits-page { display: flex; flex-direction: column; min-height: 100vh; }
+.credits { padding: 24px; display: grid; grid-template-columns: 1fr 2fr; gap: 32px; align-items: center; }
+.credits__brand { display: grid; grid-template-columns: 96px 1fr; gap: 16px; align-items: center; }
+.logo-box { width: 96px; height: 96px; border-radius: 16px; display: grid; place-items: center; background: color-mix(in oklab, var(--c-1) 40%, transparent); border: 1px solid color-mix(in oklab, var(--c-2) 35%, transparent);
+  img { width: 72px; height: 72px; object-fit: contain; }
+}
+.muted { opacity: .8; font-size: 12px; }
+.credits__grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
+
+/* Brand box (logo container) */
+.brand-box {
+  width: 160px; height: 160px; border-radius: 20px; display: grid; place-items: center;
+  background: color-mix(in oklab, var(--c-1) 30%, transparent);
+  border: 1px solid color-mix(in oklab, var(--c-3) 30%, transparent);
+  &--sm { width: 96px; height: 96px; border-radius: 16px; }
+  img { width: 75%; height: 75%; object-fit: contain; }
+}
+
+/* Splash */
+.splash { padding: 48px; display: flex; align-items: center; justify-content: space-between; }
+.splash__title { @extend .title-xl; }
+.progress { width: 260px; height: 8px; border-radius: 999px; overflow: hidden; background: color-mix(in oklab, var(--c-1) 45%, transparent); }
+.progress__bar { width: 70%; height: 100%; background: var(--c-3); }
+
+/* Level Select */
+.level-select { display: flex; flex-direction: column; min-height: 100vh; }
+.level-header { position: sticky; top: 0; }
+.levels-row { padding: 24px; display: grid; grid-template-columns: repeat(3, minmax(220px, 1fr)); gap: 18px; }
+.level-card { padding: 16px; border-radius: 14px; background: color-mix(in oklab, var(--c-1) 35%, transparent); border: 1px solid color-mix(in oklab, var(--c-3) 25%, transparent); }
+.level-card__top { display: grid; grid-template-columns: 64px 1fr auto; gap: 12px; align-items: center; }
+.icon-box { width: 64px; height: 64px; border-radius: 12px; background: color-mix(in oklab, var(--c-1) 50%, transparent); border: 1px solid color-mix(in oklab, var(--c-2) 35%, transparent); }
+.subtitle { opacity: .8; font-size: 12px; }
+.btn-full { width: 100%; padding: 10px 12px; border-radius: 10px; }
+.is-disabled { opacity: .45; pointer-events: none; }
+
+/* Responsive rules */
+@media (max-width: $bp-lg) {
+  .screen { padding: 20px; }
+}
+@media (max-width: $bp-md) {
+  .screen { flex-direction: column; align-items: flex-start; gap: 18px; }
+  .menu { width: 100%; }
+  .brand-box { width: 128px; height: 128px; }
+  .title-xl { font-size: 40px; }
+  .levels-row { grid-template-columns: repeat(2, minmax(200px, 1fr)); }
+  .credits { grid-template-columns: 1fr; }
+  .scores__table { width: 100% !important; }
+}
+@media (max-width: $bp-sm) {
+  .screen { padding: 16px; }
+  .brand-box { width: 96px; height: 96px; }
+  .title-xl { font-size: 32px; }
+  .progress { width: 200px; }
+  .levels-row { grid-template-columns: 1fr; }
+}
