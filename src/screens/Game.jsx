@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { getLevelSprites, getObjects, getLevelBackground } from '../assetsLoader'
 import { createEntityFromConfig } from '../entities/fromConfig'
 import { ghostConfig } from '../config/sprites/ghostConfig'
@@ -101,6 +102,17 @@ export default function Game({ level, onPause, onEnd }) {
   const [ready, setReady] = useState(false)
   const [seed, setSeed] = useState(0)
   const [showPause, setShowPause] = useState(false)
+  const [showJumpscare, setShowJumpscare] = useState(false)
+  const [jumpscareSrc, setJumpscareSrc] = useState(null)
+
+  // Cargar lista de imágenes de jumpscare una vez
+  const jumpscareList = useMemo(() => {
+    const rec = import.meta.glob('../assets/jumpscares/*.{png,jpg,jpeg}', { eager: true, import: 'default' })
+    const list = Object.values(rec)
+    // Debug: listar rutas detectadas
+    try { console.log('🧩 Jumpscares detectados:', list) } catch {}
+    return list
+  }, [])
   
   // Música de fondo por nivel
   const musicRef = useRef(null)
@@ -226,6 +238,17 @@ export default function Game({ level, onPause, onEnd }) {
   useEffect(() => {
     if (status !== 'playing') return
     if (timeRemaining === 0 && found.length < targets.length) {
+      // Jumpscare si el tiempo restante era bajo al perder por tiempo
+      const THRESHOLD = 30
+      if (THRESHOLD > 0 && jumpscareList.length > 0) {
+        // Al llegar a 0, mostramos si justo antes estaba por debajo del umbral
+        // timeRemaining === 0 implica que veníamos de <= 1; activamos
+        const pick = jumpscareList[Math.floor(Math.random() * jumpscareList.length)]
+        setJumpscareSrc(pick)
+        setShowJumpscare(true)
+        try { console.log('⚡ Activando jumpscare (por tiempo):', timeRemaining, pick) } catch {}
+        setTimeout(() => setShowJumpscare(false), 1500)
+      }
       setLost()
       const score = Math.max(0, Math.round((found.length/Math.max(1,targets.length))*700))
       addScore({ id: crypto.randomUUID?.() || `${Date.now()}-lose`, levelId: nivelActual, score, result: 'lose', createdAt: new Date().toISOString() })
@@ -238,6 +261,15 @@ export default function Game({ level, onPause, onEnd }) {
   useEffect(() => {
     if (status !== 'playing') return
     if (lives === 0) {
+      // Jumpscare si se pierde con poco tiempo restante
+      const THRESHOLD = 30
+      if (timeRemaining <= THRESHOLD && jumpscareList.length > 0) {
+        const pick = jumpscareList[Math.floor(Math.random() * jumpscareList.length)]
+        setJumpscareSrc(pick)
+        setShowJumpscare(true)
+        try { console.log('⚡ Activando jumpscare (por vidas):', timeRemaining, pick) } catch {}
+        setTimeout(() => setShowJumpscare(false), 1500)
+      }
       setLost()
       const score = Math.max(0, Math.round((found.length/Math.max(1,targets.length))*700))
       addScore({ id: crypto.randomUUID?.() || `${Date.now()}-lose`, levelId: nivelActual, score, result: 'lose', createdAt: new Date().toISOString() })
@@ -436,6 +468,14 @@ export default function Game({ level, onPause, onEnd }) {
                 </div>
               ))}
             </div>
+          )}
+          {showJumpscare && jumpscareSrc && createPortal(
+            (() => { try { console.log('🧠 Activando jumpscare overlay', timeRemaining, showJumpscare) } catch {} ; return (
+              <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: '#000', zIndex: 999999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <img src={jumpscareSrc} alt="jumpscare" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
+              </div>
+            )})(),
+            document.body
           )}
           {status === 'lost' && (
             <div style={{ position: 'fixed', inset: 0, display: 'grid', placeItems: 'center', background: 'rgba(0,0,0,0.5)' }}>

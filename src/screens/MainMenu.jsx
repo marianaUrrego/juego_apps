@@ -2,6 +2,7 @@ import React from 'react'
 import logo from '../assets/logo.png'
 import { useNavigate } from 'react-router-dom'
 import BrandBlock from '../components/BrandBlock'
+import { FaTrophy, FaInfoCircle, FaCog } from 'react-icons/fa'
 
 export default function MainMenu() {
   const navigate = useNavigate()
@@ -18,15 +19,15 @@ export default function MainMenu() {
             JUGAR
           </button>
           <button className="btn btn--secondary" onClick={() => navigate('/scores')}>
-            <span className="icon">🏆</span>
+            <span className="icon"><FaTrophy /></span>
             <span>Puntaje</span>
           </button>
           <button className="btn btn--secondary" onClick={() => navigate('/credits')}>
-            <span className="icon">ℹ️</span>
+            <span className="icon"><FaInfoCircle /></span>
             <span>Créditos</span>
           </button>
           <button className="btn btn--secondary" onClick={() => navigate('/settings')}>
-            <span className="icon">⚙️</span>
+            <span className="icon"><FaCog /></span>
             <span>Ajustes</span>
           </button>
         </div>
