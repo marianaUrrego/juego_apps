@@ -39,3 +39,31 @@
 
 .credits__section { margin-top: 14px; }
 .credits__muted { opacity: .8; font-size: 12px; }
+
+/* Utilidades para eliminar estilos inline en JSX */
+.credits__spacedTop { margin-top: 6px; }
+.credits__links { display: grid; gap: 6px; }
+
+/* Mobile-first centering and responsive grid */
+.credits__grid {
+  width: 100%;
+  padding-inline: clamp(12px, 4vw, 24px);
+}
+
+@media (max-width: 768px) {
+  .credits__grid {
+    grid-template-columns: 1fr;
+    gap: clamp(16px, 4vw, 24px);
+    max-width: min(680px, 100%);
+  }
+  .credits__brand {
+    grid-template-columns: 72px 1fr;
+    gap: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .credits__container { padding: 16px; }
+  .credits__brand { grid-template-columns: 56px 1fr; }
+  .credits__muted { font-size: 11px; }
+}

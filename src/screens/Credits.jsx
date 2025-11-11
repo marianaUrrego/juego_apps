@@ -23,7 +23,7 @@ export default function Credits({ onBack }) {
             <div className={styles.credits__list}>
               <div>
                 <div className={styles.credits__muted}>Equipo</div>
-                <div style={{ marginTop: 6 }}>
+                <div className={styles.credits__spacedTop}>
                   <div><b>Mariana Urrego</b></div>
                   <div className={styles.credits__muted}>Desarrollo · Diseño · Arte · Sonido</div>
                 </div>
@@ -34,7 +34,7 @@ export default function Credits({ onBack }) {
               </div>
               <div className={styles.credits__section}>
                 <div className={styles.credits__muted}>Recursos artísticos</div>
-                <div style={{ marginTop: 6, display: 'grid', gap: 6 }}>
+                <div className={`${styles.credits__spacedTop} ${styles.credits__links}`}>
                   <a className={styles.credits__muted} href="https://neopixelboyco.itch.io/background-cementery-pixel-art" target="_blank" rel="noopener noreferrer">NeopixelBoy</a>
                   <a className={styles.credits__muted} href="https://superdark.itch.io/enchanted-forest-characters" target="_blank" rel="noopener noreferrer">Superdark</a>
                   <a className={styles.credits__muted} href="https://seeone.itch.io/haunted-library" target="_blank" rel="noopener noreferrer">SeeOne – Haunted Library</a>
@@ -45,7 +45,7 @@ export default function Credits({ onBack }) {
               </div>
               <div className={styles.credits__section}>
                 <div className={styles.credits__muted}>Sonido</div>
-                <div className={styles.credits__muted} style={{ marginTop: 6 }}>Pendiente</div>
+                <div className={`${styles.credits__muted} ${styles.credits__spacedTop}`}>Pendiente</div>
               </div>
             </div>
           </div>

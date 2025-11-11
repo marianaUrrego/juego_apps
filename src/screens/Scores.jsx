@@ -29,7 +29,7 @@ export default function Scores({ onBack }) {
           <div className={styles.scores__headerLeft}>
             <button className="back-btn" onClick={onBack}>{'\u2190'}</button>
           </div>
-          <h2 className="title-md" style={{ margin: 0, textAlign: 'center' }}>Puntajes</h2>
+          <h2 className={`title-md ${styles.scores__title}`}>Puntajes</h2>
           <div className={styles.scores__headerRight} aria-hidden />
         </div>
       </header>
@@ -51,7 +51,7 @@ export default function Scores({ onBack }) {
             <tbody>
               {rows.length === 0 ? (
                 <tr>
-                  <td colSpan={7} style={{ textAlign: 'center', padding: 12 }}>Aún no hay puntajes registrados.</td>
+                  <td colSpan={7} className={styles.scores__empty}>Aún no hay puntajes registrados.</td>
                 </tr>
               ) : (
                 rows.map((r, idx) => {

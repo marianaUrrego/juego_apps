@@ -27,7 +27,9 @@
 }
 
 .scores__panel {
-  width: min(1000px, 100%);
+  width: min(100%, 720px);
+  margin: 0 auto;
+  padding-inline: clamp(8px, 2vw, 16px);
   overflow-x: auto;
 }
 
@@ -35,4 +37,13 @@
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
+}
+
+/* Utilidades para eliminar estilos inline */
+.scores__title { margin: 0; text-align: center; }
+.scores__empty { text-align: center; padding: 12px; }
+
+@media (max-width: 480px) {
+  .scores__headerLeft,
+  .scores__headerRight { width: 96px; }
 }

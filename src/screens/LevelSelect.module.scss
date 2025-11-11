@@ -4,6 +4,46 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.level__body {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  width: 100%;
+  padding: 12px;
+  padding-bottom: 24px;
+  box-sizing: border-box;
+}
+
+/* Grid responsive de tarjetas de nivel */
+.level__list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 16px;
+  width: 100%;
+  justify-items: center;
+}
+
+/* Asegurar que las tarjetas no desborden */
+.level__list :global(.level-card) {
+  width: 100%;
+  max-width: 240px;
+  box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+  .level { max-width: 720px; }
+  .level__list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 480px) {
+  .level { max-width: 600px; }
+  .level__list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 .level__overlay {
@@ -16,10 +56,10 @@
 }
 
 .level__dialog {
-  width: 360px;
-  max-width: 90vw;
+  width: min(560px, 92vw);
   display: grid;
   gap: 12px;
+  padding-inline: clamp(12px, 3.5vw, 20px);
 }
 
 .level__dialogHeader {
@@ -28,8 +68,14 @@
   justify-content: space-between;
 }
 
+.level__dialogTitle { margin: 0; }
+
 .level__actions { display: grid; gap: 8px; }
 
 .level__footer { display: flex; justify-content: center; }
 
 .level__cardActions { margin-top: 12px; }
+
+@media (max-width: 480px) {
+  .level__actions { gap: 6px; }
+}

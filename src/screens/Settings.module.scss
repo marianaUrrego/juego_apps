@@ -12,8 +12,10 @@
 }
 
 .settings__panel {
-  width: min(720px, 90%);
-  padding: 24px;
+  width: min(720px, 100%);
+  max-width: 720px;
+  margin: 0 auto;
+  padding: clamp(16px, 3.5vw, 24px);
   display: grid;
   gap: 16px;
 }
@@ -26,4 +28,14 @@
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+/* Controles */
+.settings__panel input[type='range'] {
+  width: 100%;
+}
+
+@media (max-width: 480px) {
+  .settings__panel { gap: 14px; }
+  .settings__rowInline { gap: 10px; }
 }

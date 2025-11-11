@@ -64,7 +64,7 @@ export default function LevelSelect() {
   }
 
   return (
-    <div className="page level-select">
+    <div className={`page level-select ${styles.level}`}>
       <header className="bar level-header">
         <div className="container">
           <div><button className="back-btn" onClick={() => navigate('/')}>{'←'}</button></div>
@@ -73,8 +73,8 @@ export default function LevelSelect() {
         </div>
       </header>
 
-      <div className="container page__body">
-        <div className="levels-row">
+      <div className={`container page__body ${styles.level__body}`}>
+        <div className={styles.level__list}>
           {ORDERED_LEVELS.map(l => {
             const unlocked = isUnlocked(l.order, l.id)
             const disabled = !unlocked
@@ -104,7 +104,7 @@ export default function LevelSelect() {
         <div role="dialog" aria-modal="true" className={styles.level__overlay}>
           <div className={`panel ${styles.level__dialog}`}>
             <div className={styles.level__dialogHeader}>
-              <h3 style={{ margin: 0 }}>Elige la dificultad</h3>
+              <h3 className={styles.level__dialogTitle}>Elige la dificultad</h3>
               <button aria-label="Cerrar" onClick={() => { setOpen(false); setPendingLevel(null) }} className="icon-btn">✕</button>
             </div>
             <div className={styles.level__actions}>
