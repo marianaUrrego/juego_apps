@@ -56,6 +56,7 @@ export default function Game({ level, onPause, onEnd }) {
   const setWon = useGameStore(s => s.setWon)
   const setLost = useGameStore(s => s.setLost)
   const resetLevel = useGameStore(s => s.resetLevel)
+  const resetGameSession = useGameStore(s => s.resetGameSession)
   const addScore = useGameStore(s => s.addScore)
   const nivelActual = useGameStore(s => s.nivelActual)
   const lives = useGameStore(s => s.lives)
@@ -484,7 +485,7 @@ export default function Game({ level, onPause, onEnd }) {
                 <div>{timeRemaining === 0 ? 'Se acabó el tiempo.' : 'Te quedaste sin vidas.'}</div>
                 <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
                   <button className="btn-full" onClick={() => { resetLevel(); setSeed(s=>s+1) }}>Reintentar nivel</button>
-                  <button className="btn-full" onClick={() => navigate('/')}>Volver al inicio</button>
+                  <button className="btn-full" onClick={() => { resetGameSession(); navigate('/') }}>Volver al inicio</button>
                 </div>
               </div>
             </div>
@@ -495,7 +496,7 @@ export default function Game({ level, onPause, onEnd }) {
                 <h3 style={{ margin: 0 }}>Pausa</h3>
                 <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
                   <button className="btn-full" onClick={() => setShowPause(false)}>Continuar</button>
-                  <button className="btn-full" onClick={() => { setShowPause(false); resetLevel(); navigate('/levels') }}>Salir</button>
+                  <button className="btn-full" onClick={() => { setShowPause(false); resetGameSession(); navigate('/levels') }}>Salir</button>
                 </div>
               </div>
             </div>

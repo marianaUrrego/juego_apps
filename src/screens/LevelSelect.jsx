@@ -66,7 +66,7 @@ export default function LevelSelect() {
     <div className="page level-select">
       <header className="bar level-header">
         <div className="container">
-          <div><button className="back-btn" onClick={() => navigate(-1)}>{'←'}</button></div>
+          <div><button className="back-btn" onClick={() => navigate('/')}>{'←'}</button></div>
           <h2 className="title-md">Selecciona Nivel</h2>
           <span />
         </div>

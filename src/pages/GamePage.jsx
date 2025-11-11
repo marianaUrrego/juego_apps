@@ -15,6 +15,7 @@ export default function GamePage() {
   const nivelActual = useGameStore(s => s.nivelActual)
   const setNivelActual = useGameStore(s => s.setNivelActual)
   const registrarPuntaje = useGameStore(s => s.registrarPuntaje)
+  const resetGameSession = useGameStore(s => s.resetGameSession)
 
   const level = useMemo(() => normalizeLevel(levelId) || nivelActual, [levelId, nivelActual])
 
@@ -26,7 +27,7 @@ export default function GamePage() {
   return (
     <Game
       level={level}
-      onPause={() => navigate(-1)}
+      onPause={() => { resetGameSession(); navigate('/levels') }}
       onEnd={(data) => { if (typeof data?.score === 'number') registrarPuntaje(level, data.score); navigate('/scores') }}
     />
   )

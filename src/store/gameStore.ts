@@ -42,6 +42,7 @@ interface GameState {
   setWon: () => void
   setLost: () => void
   resetLevel: () => void
+  resetGameSession: () => void
   // lives actions
   loseLife: () => void
   // scores actions
@@ -89,6 +90,7 @@ export const useGameStore = create<GameState>()(persist((set, get) => ({
   setWon: () => set({ status: 'won' }),
   setLost: () => set({ status: 'lost' }),
   resetLevel: () => set({ status: 'idle', timeRemaining: 0, lives: 3 }),
+  resetGameSession: () => set({ nivelActual: '' as LevelId, status: 'idle', timeRemaining: 0, lives: 3, difficulty: 'facil' }),
   loseLife: () => {
     const cur = get().lives
     const next = Math.max(0, cur - 1)
