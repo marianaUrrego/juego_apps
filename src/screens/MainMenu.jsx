@@ -1,33 +1,35 @@
 import React from 'react'
 import logo from '../assets/logo.png'
 import { useNavigate } from 'react-router-dom'
+import BrandBlock from '../components/BrandBlock'
 
 export default function MainMenu() {
   const navigate = useNavigate()
   return (
-    <div className="screen">
-      <div style={{ display: 'grid', gap: 16 }}>
-        <div style={{ width: 160, height: 160, borderRadius: 20, background: 'color-mix(in oklab, var(--c-1) 30%, transparent)', display: 'grid', placeItems: 'center', border: '1px solid color-mix(in oklab, var(--c-3) 30%, transparent)' }}>
-          <img src={logo} alt="logo" style={{ width: 120, height: 120, objectFit: 'contain' }} />
+    <div className="screen" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 'calc(100vh - 96px)', padding: '24px' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 48, alignItems: 'center', justifyContent: 'center', maxWidth: 1100, width: '100%', margin: '0 auto' }}>
+        {/* Columna izquierda: branding */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: '1 1 360px' }}>
+          <BrandBlock />
         </div>
-        <h1 style={{ fontSize: 48, margin: 0 }}>Haunted Hunt</h1>
-      </div>
-      <div className="menu" style={{ marginLeft: 'auto' }}>
-        <button className="btn btn--primary" onClick={() => navigate('/levels')}>
-          JUGAR
-        </button>
-        <button className="btn btn--secondary" onClick={() => navigate('/scores')}>
-          <span className="icon">🏆</span>
-          <span>Puntaje</span>
-        </button>
-        <button className="btn btn--secondary" onClick={() => navigate('/credits')}>
-          <span className="icon">ℹ️</span>
-          <span>Créditos</span>
-        </button>
-        <button className="btn btn--secondary" onClick={() => navigate('/settings')}>
-          <span className="icon">⚙️</span>
-          <span>Ajustes</span>
-        </button>
+        {/* Columna derecha: botones */}
+        <div className="menu" style={{ display: 'grid', gap: 12, alignContent: 'center', justifyItems: 'stretch', flex: '1 1 320px', maxWidth: 360 }}>
+          <button className="btn btn--primary" onClick={() => navigate('/levels')}>
+            JUGAR
+          </button>
+          <button className="btn btn--secondary" onClick={() => navigate('/scores')}>
+            <span className="icon">🏆</span>
+            <span>Puntaje</span>
+          </button>
+          <button className="btn btn--secondary" onClick={() => navigate('/credits')}>
+            <span className="icon">ℹ️</span>
+            <span>Créditos</span>
+          </button>
+          <button className="btn btn--secondary" onClick={() => navigate('/settings')}>
+            <span className="icon">⚙️</span>
+            <span>Ajustes</span>
+          </button>
+        </div>
       </div>
     </div>
   )
