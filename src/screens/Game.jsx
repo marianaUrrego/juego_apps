@@ -9,6 +9,12 @@ import { useNavigate } from 'react-router-dom'
 import { useRunHistoryStore } from '../store/runHistoryStore'
 import LivesIndicator from '../components/LivesIndicator'
 import { FaPause } from 'react-icons/fa'
+// import { bearConfig } from '../config/sprites/forest/bearConfig'
+// import { trollConfig } from '../config/sprites/forest/trollConfig'
+// import { golemConfig } from '../config/sprites/forest/golemConfig'
+// import { fairyConfig } from '../config/sprites/forest/fairyConfig'
+// import { entConfig } from '../config/sprites/forest/entConfig'
+// import { rangerConfig } from '../config/sprites/forest/rangerConfig'
 
 function sample(arr, n) {
   const copy = [...arr]
@@ -57,6 +63,8 @@ export default function Game({ level, onPause, onEnd }) {
   const difficulty = useGameStore(s => s.difficulty)
 
   const isCementery = level === 'cementery'
+  const isForest = level === 'forest'
+  const isLibrary = level === 'library'
 
   const levelName = useMemo(() => {
     switch(level){
@@ -94,11 +102,12 @@ export default function Game({ level, onPause, onEnd }) {
   const [showPause, setShowPause] = useState(false)
 
   useEffect(() => {
-    if (!isCementery) return
+    if (!(isCementery || isForest || isLibrary)) return
     let cancelled = false
     async function setup(){
       setReady(false)
-      const chars = getLevelSprites('cementery')
+      const lvl = isCementery ? 'cementery' : isForest ? 'forest' : 'library'
+      const chars = getLevelSprites(lvl)
       const objs = getObjects() // SOLO @objetos
       // Construir matriz primero: elegir posiciones y objetos colocados
       const occupancy = Math.max(24, Math.floor(grid.length * 0.65))
@@ -107,8 +116,9 @@ export default function Game({ level, onPause, onEnd }) {
       const chosen = sample(pool, occupancy)
       const placedObjects = indices.map((gi, i) => ({ id: `p-${gi}-${i}`, src: chosen[i], pos: grid[gi] }))
       // Precargar fondo + pool + sprites animados
-      const bg = getLevelBackground('cementery')
-      await preloadImages([bg, ...pool, ghostConfig.imagePath, enemy06Config.imagePath, enemy09Config.imagePath])
+      const bg = getLevelBackground(lvl)
+      const extra = isCementery ? [ghostConfig.imagePath, enemy06Config.imagePath, enemy09Config.imagePath] : isForest ? sample(chars, 6) : []
+      await preloadImages([bg, ...pool, ...extra])
       if (cancelled) return
       // Objetivos: tomar EXCLUSIVAMENTE desde los colocados
       const t = sample(placedObjects, 8)
@@ -119,7 +129,7 @@ export default function Game({ level, onPause, onEnd }) {
     }
     setup()
     return () => { cancelled = true }
-  }, [isCementery, seed])
+  }, [isCementery, isForest, isLibrary, seed])
 
   // Cachear la última matriz no vacía para evitar desapariciones visuales si placed se vacía por error
   useEffect(() => {
@@ -128,7 +138,9 @@ export default function Game({ level, onPause, onEnd }) {
     }
   }, [placed])
 
-  const bgImage = useMemo(() => isCementery ? getLevelBackground('cementery') : null, [isCementery])
+  const bgImage = useMemo(() => (isCementery || isForest || isLibrary) ? getLevelBackground(level) : null, [isCementery, isForest, isLibrary, level])
+  const sceneAspect = useMemo(() => (level === 'forest' || level === 'library') ? '16 / 9' : '300 / 128', [level])
+  const imageFit = useMemo(() => (level === 'forest' || level === 'library') ? 'contain' : 'cover', [level])
   // Matriz más grande
   const grid = useMemo(() => positionsGrid(20, 8), [])
   const canvasRef = useRef(null)
@@ -200,6 +212,7 @@ export default function Game({ level, onPause, onEnd }) {
     const canvas = canvasRef.current
     const ctx = canvas?.getContext?.('2d')
     if (!canvas || !ctx) return
+    ctx.imageSmoothingEnabled = false
 
     function fit() {
       const parent = canvas.parentElement
@@ -247,6 +260,73 @@ export default function Game({ level, onPause, onEnd }) {
     return () => { cancelAnimationFrame(raf); ro.disconnect() }
   }, [isCementery, ready])
 
+  // Canvas para bosque: personajes quietos en animación idle (Bear, Troll, Golem, Fairy, Ent, Ranger)
+  useEffect(() => {
+    if (!isForest || !ready) return
+    const canvas = canvasRef.current
+    const ctx = canvas?.getContext?.('2d')
+    if (!canvas || !ctx) return
+
+    function fit() {
+      const parent = canvas.parentElement
+      if (!parent) return
+      const rect = parent.getBoundingClientRect()
+      canvas.width = Math.floor(rect.width)
+      canvas.height = Math.floor(rect.height)
+    }
+    fit()
+    const ro = new ResizeObserver(fit)
+    ro.observe(canvas.parentElement)
+
+    let raf = 0
+    let cancelled = false
+    ;(async () => {
+      // Orden específico: Golem, Orco(Troll), Hada, Oso, Árbol(Ent)
+      const cfgs = [golemConfig, trollConfig, fairyConfig, bearConfig, entConfig]
+      const urls = cfgs.map(c => c.imagePath)
+      await preloadImages(urls)
+      if (cancelled) return
+
+      // Posiciones relativas (x,y en 0..1) para replicar la referencia
+      const idlePositions = [
+        { x: 0.09, y: 0.90 }, // Golem: esquina inferior izquierda
+        { x: 0.20, y: 0.90 }, // Orco (Troll): a la derecha del golem
+        { x: 0.50, y: 0.42 }, // Hada: centrada en el aire
+        { x: 0.80, y: 0.92 }, // Oso: esquina inferior derecha
+        { x: 0.88, y: 0.90 }, // Árbol (Ent): junto al oso
+      ]
+
+      // Mapea cada config a una posición fija; mantiene idle sin desplazamiento
+      const orderedCfgs = cfgs
+      const entities = orderedCfgs.map((cfg, i) => {
+        const pos = idlePositions[i]
+        const x = canvas.width * pos.x
+        const y = canvas.height * pos.y
+        const ent = createEntityFromConfig(cfg, x, y)
+        return { ent, x, y }
+      })
+
+      let last = performance.now()
+      function loop(ts){
+        const dt = ts - last; last = ts
+        ctx.clearRect(0,0,canvas.width,canvas.height)
+        const scale = Math.max(1, canvas.width / 300)
+        for (const state of entities) {
+          const { ent } = state
+          // No input de movimiento: se queda en idle
+          ent.update(dt, {})
+          ent.x = state.x
+          ent.y = state.y
+          ent.draw(ctx, scale)
+        }
+        raf = requestAnimationFrame(loop)
+      }
+      raf = requestAnimationFrame(loop)
+    })()
+
+    return () => { cancelled = true; cancelAnimationFrame(raf); ro.disconnect() }
+  }, [isForest, ready])
+
   function handleClick(id) {
     if (showPause) return
     const isTarget = targets.some(t => t.id === id)
@@ -263,7 +343,7 @@ export default function Game({ level, onPause, onEnd }) {
     }
   }
 
-  if (isCementery) {
+  if (isCementery || isForest || isLibrary) {
     return (
       <div className="game" style={{ background: bgColor }}>
         <header className="bar">
@@ -287,9 +367,9 @@ export default function Game({ level, onPause, onEnd }) {
           {!ready ? (
             <div className="panel">Cargando recursos...</div>
           ) : (
-            <div className="scene" style={{ position: 'relative', width: 'min(960px, 95%)', aspectRatio: '300 / 128' }}>
+            <div className="scene" style={{ position: 'relative', width: 'min(1200px, 95vw)', aspectRatio: sceneAspect }}>
               {bgImage && (
-                <img src={bgImage} alt="cementery-bg" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+                <img src={bgImage} alt={`${level}-bg`} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: imageFit }} />
               )}
               <canvas ref={canvasRef} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }} />
               {(placed.length > 0 ? placed : lastPlacedRef.current).map((obj) => (

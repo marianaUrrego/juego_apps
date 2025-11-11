@@ -7,4 +7,6 @@ export type SpriteConfig = {
   rows: number
   cols: number
   animations: Record<string, Frame[]>
+  // Optional: when provided, we'll compose a horizontal spritesheet from these single-frame images (idle sequence)
+  idleFrames?: string[]
 }

@@ -7,6 +7,8 @@ const objects = import.meta.glob('./assets/objetos/*.{png,jpg,jpeg,gif,webp,svg}
 const guiImages = import.meta.glob('./assets/gui/*.{png,jpg,jpeg,webp,svg}', { eager: true, import: 'default' })
 
 import cementeryBg from './assets/backgrounds/cementery/Background 300x128.png'
+import libraryBg from './assets/backgrounds/library/1920X1080/Haunted Library.png'
+import forestBg from './assets/backgrounds/forest/backgorund/Forest_Sunlight.png'
 
 function mapToUrls(record) {
   return Object.values(record)
@@ -34,6 +36,8 @@ export function getGuiImages() {
 
 export function getLevelBackground(level) {
   switch(level){
+    case 'library': return libraryBg
+    case 'forest': return forestBg
     case 'cementery': return cementeryBg
     default: return null
   }
