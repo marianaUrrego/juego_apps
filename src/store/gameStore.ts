@@ -2,6 +2,16 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
 export type LevelId = 'forest' | 'cementery' | 'library' | string
+export type Difficulty = 'facil' | 'medio' | 'dificil'
+
+export function getInitialTimeByDifficulty(difficulty: Difficulty): number {
+  switch (difficulty) {
+    case 'facil': return 120
+    case 'medio': return 90
+    case 'dificil': return 60
+    default: return 120
+  }
+}
 
 interface GameState {
   nivelActual: LevelId
@@ -14,6 +24,8 @@ interface GameState {
   status: 'idle' | 'playing' | 'won' | 'lost'
   // lives
   lives: number
+  // difficulty
+  difficulty: Difficulty
   // scores log
   scores: ScoreEntry[]
   // actions
@@ -22,6 +34,7 @@ interface GameState {
   setUnlockedLevels: (n: number) => void
   registrarPuntaje: (level: LevelId, score: number) => void
   setUltimoPuntaje: (score: number | null) => void
+  setDifficulty: (d: Difficulty) => void
   // timer actions
   startLevel: (durationSec: number) => void
   decrement: () => void
@@ -52,6 +65,7 @@ export const useGameStore = create<GameState>()(persist((set, get) => ({
   timeRemaining: 0,
   status: 'idle',
   lives: 3,
+  difficulty: 'facil',
   scores: [],
   setNivelActual: (level) => set({ nivelActual: level }),
   desbloquearNivel: (level) => {
@@ -65,6 +79,7 @@ export const useGameStore = create<GameState>()(persist((set, get) => ({
     set({ ultimoPuntaje: score })
   },
   setUltimoPuntaje: (score) => set({ ultimoPuntaje: score }),
+  setDifficulty: (d) => set({ difficulty: d }),
   startLevel: (durationSec) => set({ timeRemaining: durationSec, status: 'playing', lives: 3 }),
   decrement: () => {
     const t = Math.max(0, get().timeRemaining - 1)

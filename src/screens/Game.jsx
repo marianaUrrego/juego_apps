@@ -4,12 +4,12 @@ import { createEntityFromConfig } from '../entities/fromConfig'
 import { ghostConfig } from '../config/sprites/ghostConfig'
 import { enemy06Config } from '../config/sprites/enemy06Config'
 import { enemy09Config } from '../config/sprites/enemy09Config'
-import { useGameStore } from '../store/gameStore'
+import { useGameStore, getInitialTimeByDifficulty } from '../store/gameStore'
 import { useNavigate } from 'react-router-dom'
 import { useRunHistoryStore } from '../store/runHistoryStore'
-import { useSettingsStore } from '../store/settingsStore'
 import LivesIndicator from '../components/LivesIndicator'
 import { FaPause } from 'react-icons/fa'
+import Boss03 from '../components/Boss03'
 
 function sample(arr, n) {
   const copy = [...arr]
@@ -55,7 +55,7 @@ export default function Game({ level, onPause, onEnd }) {
   const loseLife = useGameStore(s => s.loseLife)
   const setUnlockedLevels = useGameStore(s => s.setUnlockedLevels)
   const addRun = useRunHistoryStore(s => s.addRun)
-  const difficulty = useSettingsStore(s => s.difficulty)
+  const difficulty = useGameStore(s => s.difficulty)
 
   const isCementery = level === 'cementery'
 
@@ -73,6 +73,7 @@ export default function Game({ level, onPause, onEnd }) {
   const [placed, setPlaced] = useState([])   // objetos colocados en la matriz: { id, src, pos }
   const [ready, setReady] = useState(false)
   const [seed, setSeed] = useState(0)
+  const [showPause, setShowPause] = useState(false)
 
   useEffect(() => {
     if (!isCementery) return
@@ -110,15 +111,16 @@ export default function Game({ level, onPause, onEnd }) {
   // Timer: iniciar al estar listo el nivel
   useEffect(() => {
     if (!ready) return
-    if (status !== 'playing') startLevel(120)
-  }, [ready])
+    if (status !== 'playing') startLevel(getInitialTimeByDifficulty(difficulty))
+  }, [ready, difficulty])
 
   // Intervalo de 1s mientras se juega
   useEffect(() => {
     if (status !== 'playing') return
+    if (showPause) return
     const id = setInterval(() => decrement(), 1000)
     return () => clearInterval(id)
-  }, [status])
+  }, [status, showPause])
 
   // Derivar victoria por colección completa
   useEffect(() => {
@@ -127,7 +129,7 @@ export default function Game({ level, onPause, onEnd }) {
       setWon()
       const score = Math.max(0, Math.round((found.length/Math.max(1,targets.length))*700 + timeRemaining*3))
       addScore({ id: crypto.randomUUID?.() || `${Date.now()}-win`, levelId: nivelActual, score, result: 'win', createdAt: new Date().toISOString() })
-      const timeSeconds = 120 - timeRemaining
+      const timeSeconds = getInitialTimeByDifficulty(difficulty) - timeRemaining
       addRun({ levelId: nivelActual, score, timeSeconds, difficulty, result: 'win' })
       // Desbloqueo de niveles por progreso
       if (nivelActual === 'cementery') {
@@ -145,7 +147,7 @@ export default function Game({ level, onPause, onEnd }) {
       setLost()
       const score = Math.max(0, Math.round((found.length/Math.max(1,targets.length))*700))
       addScore({ id: crypto.randomUUID?.() || `${Date.now()}-lose`, levelId: nivelActual, score, result: 'lose', createdAt: new Date().toISOString() })
-      const timeSeconds = 120
+      const timeSeconds = getInitialTimeByDifficulty(difficulty)
       addRun({ levelId: nivelActual, score, timeSeconds, difficulty, result: 'lose' })
     }
   }, [timeRemaining, status, found, targets])
@@ -157,7 +159,7 @@ export default function Game({ level, onPause, onEnd }) {
       setLost()
       const score = Math.max(0, Math.round((found.length/Math.max(1,targets.length))*700))
       addScore({ id: crypto.randomUUID?.() || `${Date.now()}-lose`, levelId: nivelActual, score, result: 'lose', createdAt: new Date().toISOString() })
-      const timeSeconds = 120 - timeRemaining
+      const timeSeconds = getInitialTimeByDifficulty(difficulty) - timeRemaining
       addRun({ levelId: nivelActual, score, timeSeconds, difficulty, result: 'lose' })
     }
   }, [lives, status])
@@ -220,6 +222,7 @@ export default function Game({ level, onPause, onEnd }) {
   }, [isCementery, ready])
 
   function handleClick(id) {
+    if (showPause) return
     const isTarget = targets.some(t => t.id === id)
     if (isTarget && !found.includes(id)) {
       const f = [...found, id]
@@ -239,7 +242,7 @@ export default function Game({ level, onPause, onEnd }) {
       <div className="game" style={{ background: bgColor }}>
         <header className="bar">
           <div className="container">
-            <button className="back-btn" onClick={onPause} title="Pausa" style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+            <button className="back-btn" onClick={() => setShowPause(true)} title="Pausa" style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
               <FaPause /> <span>Pausa</span>
             </button>
             <h2 className="title-md">Escenario: <b>Cementerio</b></h2>
@@ -265,6 +268,8 @@ export default function Game({ level, onPause, onEnd }) {
                 <img src={bgImage} alt="cementery-bg" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
               )}
               <canvas ref={canvasRef} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }} />
+              {/* Boss decorativo: no interactivo (animado arriba a la derecha) */}
+              <Boss03 width={120} />
               {placed.map((obj) => (
                 <img
                   key={obj.id}
@@ -293,6 +298,17 @@ export default function Game({ level, onPause, onEnd }) {
                 <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
                   <button className="btn-full" onClick={() => { resetLevel(); setSeed(s=>s+1) }}>Reintentar nivel</button>
                   <button className="btn-full" onClick={() => navigate('/')}>Volver al inicio</button>
+                </div>
+              </div>
+            </div>
+          )}
+          {showPause && (
+            <div style={{ position: 'fixed', inset: 0, display: 'grid', placeItems: 'center', background: 'rgba(0,0,0,0.6)', zIndex: 5 }}>
+              <div className="panel" style={{ width: 360, textAlign: 'center', display: 'grid', gap: 12 }}>
+                <h3 style={{ margin: 0 }}>Pausa</h3>
+                <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
+                  <button className="btn-full" onClick={() => setShowPause(false)}>Continuar</button>
+                  <button className="btn-full" onClick={() => { setShowPause(false); resetLevel(); navigate('/levels') }}>Salir</button>
                 </div>
               </div>
             </div>
