@@ -66,10 +66,10 @@ export default function LevelSelect() {
   return (
     <div className={`page level-select ${styles.level}`}>
       <header className="bar level-header">
-        <div className="container">
-          <div><button className="back-btn" onClick={() => navigate('/')}>{'←'}</button></div>
-          <h2 className="title-md">Selecciona Nivel</h2>
-          <span />
+        <div className={`container`}>
+          <div className="level-header__back"><button className="back-btn" onClick={() => navigate('/')}>{'←'}</button></div>
+          <h2 className="title-md level-header__title">Selecciona Nivel</h2>
+          <span className="level-header__spacer" />
         </div>
       </header>
 
