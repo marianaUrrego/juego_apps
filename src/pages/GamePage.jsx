@@ -28,7 +28,7 @@ export default function GamePage() {
     <Game
       level={level}
       onPause={() => { resetGameSession(); navigate('/levels') }}
-      onEnd={(data) => { if (typeof data?.score === 'number') registrarPuntaje(level, data.score); navigate('/scores') }}
+      onEnd={(data) => { if (typeof data?.score === 'number') registrarPuntaje(level, data.score); navigate('/scores', { state: { from: 'levels' } }) }}
     />
   )
 }

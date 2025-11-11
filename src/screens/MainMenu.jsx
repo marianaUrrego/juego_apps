@@ -19,7 +19,7 @@ export default function MainMenu() {
           <button className="btn btn--primary" onClick={() => navigate('/levels')}>
             JUGAR
           </button>
-          <button className="btn btn--secondary" onClick={() => navigate('/scores')}>
+          <button className="btn btn--secondary" onClick={() => navigate('/scores', { state: { from: 'home' } })}>
             <span className="icon"><FaTrophy /></span>
             <span>Puntaje</span>
           </button>

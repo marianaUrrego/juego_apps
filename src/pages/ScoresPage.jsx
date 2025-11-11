@@ -1,8 +1,14 @@
 import React from 'react'
 import Scores from '../screens/Scores'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 export default function ScoresPage() {
   const navigate = useNavigate()
-  return <Scores onBack={() => navigate('/levels')} />
+  const location = useLocation()
+  const from = location.state?.from
+  const handleBack = () => {
+    if (from === 'home') navigate('/')
+    else navigate('/levels')
+  }
+  return <Scores onBack={handleBack} />
 }
