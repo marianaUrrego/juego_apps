@@ -445,22 +445,25 @@ export default function Game({ level, onPause, onEnd }) {
   if (isCementery || isForest || isLibrary) {
     return (
       <div className={styles.game} style={{ background: bgColor }}>
-        <header className={styles.game__bar}>
-          <div className={styles.game__barInner}>
-            <button className={`${styles.game__btn} back-btn`} onClick={() => setShowPause(true)} title="Pausa">
-              <FaPause /> <span>Pausa</span>
-            </button>
-            <h2 className={`title-md ${styles.game__title}`}>Nivel: <b>{levelName}</b> · Dificultad: <b>{difficultyLabel}</b></h2>
-            <div />
-          </div>
-        </header>
         <div className={styles.game__body}>
           {status === 'playing' && (
             <div className={styles.game__hud}>
-              <LivesIndicator lives={lives} />
-              <span className={`${styles.game__timer} ${timeRemaining <= 10 ? styles['game__timer--danger'] : ''}`}>
-                {fmt(timeRemaining)}
-              </span>
+              <div className={styles.game__hudLeft}>
+                <button
+                  className={styles.game__pauseButton}
+                  onClick={() => setShowPause(true)}
+                  title="Pausa"
+                >
+                  <FaPause />
+                  <span>Pausa</span>
+                </button>
+              </div>
+              <div className={styles.game__hudRight}>
+                <LivesIndicator lives={lives} />
+                <span className={`${styles.game__timer} ${timeRemaining <= 10 ? styles['game__timer--danger'] : ''}`}>
+                  {fmt(timeRemaining)}
+                </span>
+              </div>
             </div>
           )}
           {!ready ? (
