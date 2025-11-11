@@ -6,6 +6,34 @@
   min-height: 100vh;
 }
 
+/* Header de Scores: igual comportamiento que LevelSelect */
+:global(.bar.scores-header) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 16px;
+  box-sizing: border-box;
+  width: 100%;
+}
+:global(.bar.scores-header) .container {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  width: 100%;
+}
+:global(.scores-header__back) {
+  margin-right: auto;
+  display: flex;
+  align-items: center;
+}
+:global(.scores-header__title) {
+  flex: 0 1 auto;
+  text-align: center;
+  width: 100%;
+}
+:global(.scores-header__spacer) { margin-left: auto; }
+
 .scores__headerInner {
   display: flex;
   align-items: center;
