@@ -90,7 +90,7 @@ export const useGameStore = create<GameState>()(persist((set, get) => ({
   setWon: () => set({ status: 'won' }),
   setLost: () => set({ status: 'lost' }),
   resetLevel: () => set({ status: 'idle', timeRemaining: 0, lives: 3 }),
-  resetGameSession: () => set({ nivelActual: '' as LevelId, status: 'idle', timeRemaining: 0, lives: 3, difficulty: 'facil' }),
+  resetGameSession: () => set({ nivelActual: '' as LevelId, status: 'idle', timeRemaining: 0, lives: 3 }),
   loseLife: () => {
     const cur = get().lives
     const next = Math.max(0, cur - 1)

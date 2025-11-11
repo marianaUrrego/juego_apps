@@ -4,5 +4,5 @@ import { useNavigate } from 'react-router-dom'
 
 export default function ScoresPage() {
   const navigate = useNavigate()
-  return <Scores onBack={() => navigate(-1)} />
+  return <Scores onBack={() => navigate('/levels')} />
 }

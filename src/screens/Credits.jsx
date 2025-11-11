@@ -24,11 +24,11 @@ export default function Credits({ onBack }) {
               <h3 className={styles.credits__title}>Equipo</h3>
               <div className={styles.credits__person}>
                 <div><b>Mariana Urrego</b></div>
-                <div className={styles.credits__muted}>Desarrollo · Diseño · Arte · Sonido</div>
+                <div className={styles.credits__muted}>Desarrollo · Diseño </div>
               </div>
               <div className={styles.credits__person}>
                 <div><b>Juanita Correa</b></div>
-                <div className={styles.credits__muted}>Desarrollo · Diseño · Arte · Sonido</div>
+                <div className={styles.credits__muted}>Desarrollo · Diseño </div>
               </div>
             </div>
             <div className={styles.credits__col}>

@@ -208,7 +208,7 @@ export default function Game({ level, onPause, onEnd }) {
   useEffect(() => {
     if (!ready) return
     if (status !== 'playing') startLevel(getInitialTimeByDifficulty(difficulty))
-  }, [ready, difficulty])
+  }, [ready, difficulty, status])
 
   // Intervalo de 1s mientras se juega
   useEffect(() => {
