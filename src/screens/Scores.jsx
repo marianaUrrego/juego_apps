@@ -8,18 +8,25 @@ function splitDate(iso){
   return { fecha, hora }
 }
 
+function formatMMSS(totalSeconds){
+  const s = Math.max(0, Math.floor(totalSeconds || 0))
+  const mm = String(Math.floor(s / 60)).padStart(2, '0')
+  const ss = String(s % 60).padStart(2, '0')
+  return `${mm}:${ss}`
+}
+
 export default function Scores({ onBack }) {
   const runs = useRunHistoryStore(s => s.runs)
 
   // Mezclar todas las partidas y ordenar por mejor tiempo (asc)
-  const rows = useMemo(() => [...runs].sort((a,b) => a.timeSeconds - b.timeSeconds), [runs])
+  const rows = useMemo(() => [...runs].sort((a,b) => b.score - a.score), [runs])
 
   return (
     <div className="page scores-page">
       <header className="bar">
         <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, minHeight: 56, width: '100%' }}>
           <div style={{ width: 140, display: 'flex', justifyContent: 'flex-start' }}>
-            <button className="back-btn" onClick={onBack}>{'←'}</button>
+            <button className="back-btn" onClick={onBack}>{'\u2190'}</button>
           </div>
           <h2 className="title-md" style={{ margin: 0, textAlign: 'center' }}>Puntajes</h2>
           <div style={{ width: 140 }} aria-hidden />
@@ -36,7 +43,7 @@ export default function Scores({ onBack }) {
                 <th>Nivel</th>
                 <th>Dificultad</th>
                 <th>Fecha</th>
-                <th>Hora</th>
+                <th>Tiempo</th>
                 <th>Puntaje</th>
               </tr>
             </thead>
@@ -47,7 +54,7 @@ export default function Scores({ onBack }) {
                 </tr>
               ) : (
                 rows.map((r, idx) => {
-                  const { fecha, hora } = splitDate(r.datetime)
+                  const { fecha } = splitDate(r.datetime)
                   return (
                     <tr key={r.id}>
                       <td className="rank">{idx+1}</td>
@@ -55,7 +62,7 @@ export default function Scores({ onBack }) {
                       <td>{r.levelId}</td>
                       <td>{r.difficulty}</td>
                       <td>{fecha}</td>
-                      <td>{hora}</td>
+                      <td>{formatMMSS(r.timeSeconds)}</td>
                       <td className="score">{r.score}</td>
                     </tr>
                   )

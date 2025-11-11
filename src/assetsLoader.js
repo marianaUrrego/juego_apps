@@ -23,7 +23,9 @@ export function getLevelSprites(level) {
 
 export function getObjects(limit) {
   const list = mapToUrls(objects)
-  return typeof limit === 'number' ? list.slice(0, limit) : list
+  // Excluir cualquier archivo que parezca ser un spritesheet de Boss
+  const filtered = list.filter(u => !/boss\s?\d*\./i.test(u))
+  return typeof limit === 'number' ? filtered.slice(0, limit) : filtered
 }
 
 export function getGuiImages() {
