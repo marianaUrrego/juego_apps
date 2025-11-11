@@ -1,1 +1,29 @@
 /* Estilos locales para Settings */
+
+.settings {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.settings__body {
+  display: grid;
+  place-items: center;
+}
+
+.settings__panel {
+  width: min(720px, 90%);
+  padding: 24px;
+  display: grid;
+  gap: 16px;
+}
+
+.settings__row {
+  display: block;
+}
+
+.settings__rowInline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}

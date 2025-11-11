@@ -11,7 +11,7 @@ export default function Settings({ onBack }) {
   const toggleMute = useSettingsStore(s => s.toggleMute)
 
   return (
-    <div className="page">
+    <div className={`page ${styles.settings}`}>
       <header className="bar">
         <div className="container">
           <button className="back-btn" onClick={onBack}>{'←'}</button>
@@ -19,17 +19,17 @@ export default function Settings({ onBack }) {
           <span />
         </div>
       </header>
-      <div className="container page__body">
-        <div className="panel panel--form">
-          <label>
+      <div className={`container page__body ${styles.settings__body}`}>
+        <div className={`panel panel--form ${styles.settings__panel}`}>
+          <label className={styles.settings__row}>
             Música {Math.round(music*100)}%
             <input type="range" min={0} max={1} step={0.01} value={music} onChange={e=>setVolumenMusica(parseFloat(e.target.value))} />
           </label>
-          <label>
+          <label className={styles.settings__row}>
             SFX {Math.round(sfx*100)}%
             <input type="range" min={0} max={1} step={0.01} value={sfx} onChange={e=>setVolumenSFX(parseFloat(e.target.value))} />
           </label>
-          <label style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <label className={styles.settings__rowInline}>
             <input type="checkbox" checked={mute} onChange={toggleMute} /> Mute
           </label>
         </div>

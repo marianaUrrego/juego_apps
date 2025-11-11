@@ -1,1 +1,41 @@
 /* Estilos locales para Credits */
+
+.credits {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.credits__container {
+  padding: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 96px);
+}
+
+.credits__grid {
+  max-width: 980px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+  align-items: center;
+  justify-content: center;
+}
+
+.credits__brand {
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  gap: 16px;
+  align-items: center;
+}
+
+.credits__list {
+  display: grid;
+  gap: 16px;
+  justify-items: start;
+}
+
+.credits__section { margin-top: 14px; }
+.credits__muted { opacity: .8; font-size: 12px; }

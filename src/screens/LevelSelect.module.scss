@@ -1,1 +1,35 @@
-/* Estilos locales para LevelSelect */
+/* Estilos locales para Level Select */
+
+.level {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.level__overlay {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(0,0,0,0.55);
+  z-index: 50;
+}
+
+.level__dialog {
+  width: 360px;
+  max-width: 90vw;
+  display: grid;
+  gap: 12px;
+}
+
+.level__dialogHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.level__actions { display: grid; gap: 8px; }
+
+.level__footer { display: flex; justify-content: center; }
+
+.level__cardActions { margin-top: 12px; }

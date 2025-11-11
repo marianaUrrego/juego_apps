@@ -424,67 +424,68 @@ export default function Game({ level, onPause, onEnd }) {
 
   if (isCementery || isForest || isLibrary) {
     return (
-      <div className="game" style={{ background: bgColor }}>
-        <header className="bar">
-          <div className="container">
-            <button className="back-btn" onClick={() => setShowPause(true)} title="Pausa" style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+      <div className={styles.game} style={{ background: bgColor }}>
+        <header className={styles.game__bar}>
+          <div className={styles.game__barInner}>
+            <button className={`${styles.game__btn} back-btn`} onClick={() => setShowPause(true)} title="Pausa">
               <FaPause /> <span>Pausa</span>
             </button>
-            <h2 className="title-md" style={{ whiteSpace: 'nowrap' }}>Nivel: <b>{levelName}</b> · Dificultad: <b>{difficultyLabel}</b></h2>
+            <h2 className={`title-md ${styles.game__title}`}>Nivel: <b>{levelName}</b> · Dificultad: <b>{difficultyLabel}</b></h2>
             <div />
           </div>
         </header>
-        <div className="container page__body">
+        <div className={styles.game__body}>
           {status === 'playing' && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, justifyContent: 'flex-start', padding: '8px 0 6px', marginLeft: 'max(12px, 5%)' }}>
+            <div className={styles.game__hud}>
               <LivesIndicator lives={lives} />
-              <span style={{ fontWeight: 700, padding: '6px 10px', borderRadius: 8, background: 'rgba(0,0,0,0.25)', border: '1px solid rgba(255,255,255,0.1)', color: timeRemaining <= 10 ? '#ff7575' : 'var(--c-text)' }}>
+              <span className={`${styles.game__timer} ${timeRemaining <= 10 ? styles['game__timer--danger'] : ''}`}>
                 {fmt(timeRemaining)}
               </span>
             </div>
           )}
           {!ready ? (
-            <div className="panel">Cargando recursos...</div>
+            <div className={styles.game__panel}>Cargando recursos...</div>
           ) : (
-            <div className="scene" style={{ position: 'relative', width: 'min(1200px, 95vw)', aspectRatio: sceneAspect }}>
+            <div className={styles.game__sceneWrapper} style={{ aspectRatio: sceneAspect }}>
               {bgImage && (
-                <img src={bgImage} alt={`${level}-bg`} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: imageFit }} />
+                <img className={styles.game__bg} src={bgImage} alt={`${level}-bg`} style={{ objectFit: imageFit }} />
               )}
-              <canvas ref={canvasRef} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }} />
+              <canvas ref={canvasRef} className={styles.game__canvas} />
               {(placed.length > 0 ? placed : lastPlacedRef.current).map((obj) => (
                 <img
                   key={obj.id}
+                  className={`${styles.game__object} ${found.includes(obj.id) ? styles['game__object--found'] : ''}`}
                   src={obj.src}
                   alt="item"
                   onClick={() => handleClick(obj.id)}
-                  style={{ position: 'absolute', transform: 'translate(-50%, -50%)', cursor: 'pointer', left: obj.pos.left, top: obj.pos.top, maxWidth: 56, maxHeight: 56, imageRendering: 'pixelated', filter: found.includes(obj.id) ? 'grayscale(1) opacity(0.4)' : 'none' }}
+                  style={{ left: obj.pos.left, top: obj.pos.top }}
                 />
               ))}
             </div>
           )}
           {ready && (
-            <div className="targets" style={{ marginTop: 16, display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'center' }}>
-              {targets.map((obj, i) => (
-                <div key={obj.id} style={{ width: 56, height: 56, borderRadius: 8, border: '1px solid #2a2a2a', background: '#121212', display: 'grid', placeItems: 'center', opacity: found.includes(obj.id) ? 0.4 : 1 }}>
-                  <img src={obj.src} alt="target" style={{ maxWidth: 40, maxHeight: 40, objectFit: 'contain', imageRendering: 'pixelated' }} />
+            <div className={styles.game__targets}>
+              {targets.map((obj) => (
+                <div key={obj.id} className={`${styles.game__target} ${found.includes(obj.id) ? styles['game__target--found'] : ''}`}>
+                  <img src={obj.src} alt="target" />
                 </div>
               ))}
             </div>
           )}
           {showJumpscare && jumpscareSrc && createPortal(
             (() => { try { console.log('🧠 Activando jumpscare overlay', timeRemaining, showJumpscare) } catch {} ; return (
-              <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: '#000', zIndex: 999999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div className={styles.game__jumpscare}>
                 <img src={jumpscareSrc} alt="jumpscare" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
               </div>
             )})(),
             document.body
           )}
           {status === 'lost' && (
-            <div style={{ position: 'fixed', inset: 0, display: 'grid', placeItems: 'center', background: 'rgba(0,0,0,0.5)' }}>
-              <div className="panel" style={{ width: 360, textAlign: 'center', display: 'grid', gap: 12 }}>
+            <div className={styles.game__overlay}>
+              <div className={styles.game__panel}>
                 <h3 style={{ margin: 0 }}>Perdiste</h3>
                 <div>{timeRemaining === 0 ? 'Se acabó el tiempo.' : 'Te quedaste sin vidas.'}</div>
-                <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
+                <div className={styles.game__actions}>
                   <button className="btn-full" onClick={() => { resetLevel(); setSeed(s=>s+1) }}>Reintentar nivel</button>
                   <button className="btn-full" onClick={() => { resetGameSession(); navigate('/') }}>Volver al inicio</button>
                 </div>
@@ -492,10 +493,10 @@ export default function Game({ level, onPause, onEnd }) {
             </div>
           )}
           {showPause && (
-            <div style={{ position: 'fixed', inset: 0, display: 'grid', placeItems: 'center', background: 'rgba(0,0,0,0.6)', zIndex: 5 }}>
-              <div className="panel" style={{ width: 360, textAlign: 'center', display: 'grid', gap: 12 }}>
+            <div className={`${styles.game__overlay} ${styles['game__overlay--pause']}`}>
+              <div className={styles.game__panel}>
                 <h3 style={{ margin: 0 }}>Pausa</h3>
-                <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
+                <div className={styles.game__actions}>
                   <button className="btn-full" onClick={() => setShowPause(false)}>Continuar</button>
                   <button className="btn-full" onClick={() => { setShowPause(false); resetGameSession(); navigate('/levels') }}>Salir</button>
                 </div>

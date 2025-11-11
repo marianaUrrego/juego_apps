@@ -23,20 +23,20 @@ export default function Scores({ onBack }) {
   const rows = useMemo(() => [...runs].sort((a,b) => b.score - a.score), [runs])
 
   return (
-    <div className="page scores-page">
+    <div className={`page ${styles.scores}`}>
       <header className="bar">
-        <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, minHeight: 56, width: '100%' }}>
-          <div style={{ width: 140, display: 'flex', justifyContent: 'flex-start' }}>
+        <div className={`container ${styles.scores__headerInner}`}>
+          <div className={styles.scores__headerLeft}>
             <button className="back-btn" onClick={onBack}>{'\u2190'}</button>
           </div>
           <h2 className="title-md" style={{ margin: 0, textAlign: 'center' }}>Puntajes</h2>
-          <div style={{ width: 140 }} aria-hidden />
+          <div className={styles.scores__headerRight} aria-hidden />
         </div>
       </header>
 
-      <div className="container page__body" style={{ alignContent: 'start' }}>
-        <div className="panel" style={{ width: 'min(1000px, 100%)', overflowX: 'auto' }}>
-          <table className="table table--scores" style={{ width: '100%', borderCollapse: 'separate', borderSpacing: 0 }}>
+      <div className={`container page__body ${styles.scores__body}`}>
+        <div className={`panel ${styles.scores__panel}`}>
+          <table className={`table table--scores ${styles.scores__table}`}>
             <thead>
               <tr>
                 <th>#</th>

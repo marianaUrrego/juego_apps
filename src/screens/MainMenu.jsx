@@ -8,14 +8,14 @@ import styles from './MainMenu.module.scss'
 export default function MainMenu() {
   const navigate = useNavigate()
   return (
-    <div className="screen" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 'calc(100vh - 96px)', padding: '24px' }}>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 48, alignItems: 'center', justifyContent: 'center', maxWidth: 1100, width: '100%', margin: '0 auto' }}>
+    <div className={`screen ${styles.main}`}>
+      <div className={styles.main__wrapper}>
         {/* Columna izquierda: branding */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: '1 1 360px' }}>
+        <div className={styles.main__left}>
           <BrandBlock />
         </div>
         {/* Columna derecha: botones */}
-        <div className="menu" style={{ display: 'grid', gap: 12, alignContent: 'center', justifyItems: 'stretch', flex: '1 1 320px', maxWidth: 360 }}>
+        <div className={`${styles.main__menu} menu`}>
           <button className="btn btn--primary" onClick={() => navigate('/levels')}>
             JUGAR
           </button>

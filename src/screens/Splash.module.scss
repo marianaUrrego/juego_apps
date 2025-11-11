@@ -1,1 +1,42 @@
 /* Estilos locales para Splash */
+
+.splash {
+  padding: 48px;
+}
+
+.splash__container {
+  display: grid;
+  gap: 16px;
+}
+
+.splash__brandBox {
+  width: 160px;
+  height: 160px;
+  border-radius: 20px;
+  background: color-mix(in oklab, var(--c-1) 30%, transparent);
+  display: grid;
+  place-items: center;
+  border: 1px solid color-mix(in oklab, var(--c-3) 30%, transparent);
+
+  img {
+    width: 120px;
+    height: 120px;
+    object-fit: contain;
+  }
+}
+
+.splash__title { font-size: 48px; margin: 0; }
+
+.splash__progress {
+  width: 260px;
+  height: 8px;
+  background: color-mix(in oklab, var(--c-1) 45%, transparent);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.splash__bar {
+  width: 70%;
+  height: 100%;
+  background: var(--c-3);
+}

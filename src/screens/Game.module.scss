@@ -1,1 +1,164 @@
 /* Estilos locales para Game */
+
+.game {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.game__bar {
+  display: grid;
+  grid-template-columns: 1fr;
+  background: color-mix(in oklab, var(--c-1) 30%, transparent);
+  border-bottom: 1px solid color-mix(in oklab, var(--c-3) 30%, transparent);
+}
+
+.game__barInner {
+  width: min(1200px, 100%);
+  margin-inline: auto;
+  padding: 6px 16px;
+  display: grid;
+  grid-template-columns: 160px 1fr 160px;
+  align-items: center;
+}
+
+.game__title {
+  white-space: nowrap;
+}
+
+.game__body {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  width: min(1200px, 100%);
+  margin-inline: auto;
+  padding: 12px 16px;
+}
+
+.game__hud {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: flex-start;
+  padding: 8px 0 6px;
+  margin-left: max(12px, 5%);
+}
+
+.game__timer {
+  font-weight: 700;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: rgba(0,0,0,0.25);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: var(--c-text);
+}
+.game__timer--danger {
+  color: #ff7575;
+}
+
+.game__sceneWrapper {
+  position: relative;
+  width: min(1200px, 95vw);
+}
+
+.game__bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.game__canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.game__object {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+  max-width: 56px;
+  max-height: 56px;
+  image-rendering: pixelated;
+}
+.game__object--found {
+  filter: grayscale(1) opacity(0.4);
+}
+
+.game__targets {
+  margin-top: 16px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.game__target {
+  width: 56px;
+  height: 56px;
+  border-radius: 8px;
+  border: 1px solid #2a2a2a;
+  background: #121212;
+  display: grid;
+  place-items: center;
+
+  img {
+    max-width: 40px;
+    max-height: 40px;
+    object-fit: contain;
+    image-rendering: pixelated;
+  }
+}
+.game__target--found { opacity: 0.4; }
+
+.game__panel {
+  width: 360px;
+  max-width: 90vw;
+  text-align: center;
+  display: grid;
+  gap: 12px;
+  background: color-mix(in oklab, var(--c-1) 35%, transparent);
+  border: 1px solid color-mix(in oklab, var(--c-3) 30%, transparent);
+  border-radius: 12px;
+  padding: 20px;
+
+  h3 { margin: 0; }
+}
+
+.game__overlay {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(0,0,0,0.5);
+  z-index: 5;
+}
+.game__overlay--pause { background: rgba(0,0,0,0.6); }
+
+.game__jumpscare {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: #000;
+  z-index: 999999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.game__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.game__actions {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}

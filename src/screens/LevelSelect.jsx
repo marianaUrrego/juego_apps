@@ -89,7 +89,7 @@ export default function LevelSelect() {
                   </div>
                   {unlocked && <span style={{ fontSize: 18 }}>✔</span>}
                 </div>
-                <div style={{ marginTop: 12 }}>
+                <div className={styles.level__cardActions}>
                   <button className="btn-full" onClick={() => { if (disabled) return; handleChooseLevel(l.id) }} disabled={disabled}>
                     {disabled ? 'Bloqueado' : 'Jugar'}
                   </button>
@@ -101,18 +101,18 @@ export default function LevelSelect() {
       </div>
 
       {open && (
-        <div role="dialog" aria-modal="true" style={{ position: 'fixed', inset: 0, display: 'grid', placeItems: 'center', background: 'rgba(0,0,0,0.55)', zIndex: 50 }}>
-          <div className="panel" style={{ width: 360, maxWidth: '90vw', display: 'grid', gap: 12 }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div role="dialog" aria-modal="true" className={styles.level__overlay}>
+          <div className={`panel ${styles.level__dialog}`}>
+            <div className={styles.level__dialogHeader}>
               <h3 style={{ margin: 0 }}>Elige la dificultad</h3>
               <button aria-label="Cerrar" onClick={() => { setOpen(false); setPendingLevel(null) }} className="icon-btn">✕</button>
             </div>
-            <div style={{ display: 'grid', gap: 8 }}>
+            <div className={styles.level__actions}>
               <button className="btn-full" onClick={() => startWithDifficulty('facil')}>Fácil</button>
               <button className="btn-full" onClick={() => startWithDifficulty('medio')}>Medio</button>
               <button className="btn-full" onClick={() => startWithDifficulty('dificil')}>Difícil</button>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <div className={styles.level__footer}>
               <button className="btn" onClick={() => { setOpen(false); setPendingLevel(null) }}>Cancelar</button>
             </div>
           </div>

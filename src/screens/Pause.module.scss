@@ -1,1 +1,16 @@
 /* Estilos locales para Pause */
+
+.pause__overlay {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(0,0,0,0.55);
+}
+
+.pause__panel {
+  width: 360px;
+  text-align: center;
+  display: grid;
+  gap: 12px;
+}
