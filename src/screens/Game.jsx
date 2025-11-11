@@ -7,6 +7,7 @@ import { enemy09Config } from '../config/sprites/enemy09Config'
 import { useGameStore, getInitialTimeByDifficulty } from '../store/gameStore'
 import { useNavigate } from 'react-router-dom'
 import { useRunHistoryStore } from '../store/runHistoryStore'
+import { useSettingsStore } from '../store/settingsStore'
 import LivesIndicator from '../components/LivesIndicator'
 import { FaPause } from 'react-icons/fa'
 // import { bearConfig } from '../config/sprites/forest/bearConfig'
@@ -100,6 +101,50 @@ export default function Game({ level, onPause, onEnd }) {
   const [ready, setReady] = useState(false)
   const [seed, setSeed] = useState(0)
   const [showPause, setShowPause] = useState(false)
+  
+  // Música de fondo por nivel
+  const musicRef = useRef(null)
+  const musicVol = useSettingsStore?.(s => s.volumenMusica)
+  const mute = useSettingsStore?.(s => s.mute)
+
+  const forestAudioUrl = useMemo(() => new URL('../assets/audio/forestaudio.mp3', import.meta.url).href, [])
+  const cementeryAudioUrl = useMemo(() => new URL('../assets/audio/cementeryaudio.mp3', import.meta.url).href, [])
+  const libraryAudioUrl = useMemo(() => new URL('../assets/audio/libraryaudio.mp3', import.meta.url).href, [])
+
+  useEffect(() => {
+    // Detener cualquier música previa
+    if (musicRef.current) {
+      try { musicRef.current.pause(); musicRef.current.currentTime = 0 } catch {}
+    }
+    // Seleccionar pista por nivel
+    let url = null
+    if (isForest) url = forestAudioUrl
+    else if (isCementery) url = cementeryAudioUrl
+    else if (isLibrary) url = libraryAudioUrl
+    if (!url) return
+
+    const audio = new Audio(url)
+    audio.loop = true
+    audio.volume = mute ? 0 : (typeof musicVol === 'number' ? musicVol : 0.5)
+    musicRef.current = audio
+    // Intentar reproducir
+    audio.play().catch(() => {})
+    return () => {
+      try { audio.pause(); audio.currentTime = 0 } catch {}
+    }
+  }, [isForest, isCementery, isLibrary])
+
+  // Sincronizar mute/volumen de ajustes
+  useEffect(() => {
+    const audio = musicRef.current
+    if (!audio) return
+    audio.volume = mute ? 0 : (typeof musicVol === 'number' ? musicVol : audio.volume)
+    if (mute) {
+      try { audio.pause() } catch {}
+    } else {
+      if (audio.paused) audio.play().catch(() => {})
+    }
+  }, [musicVol, mute])
 
   useEffect(() => {
     if (!(isCementery || isForest || isLibrary)) return
