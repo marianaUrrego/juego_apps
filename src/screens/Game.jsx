@@ -63,6 +63,7 @@ export default function Game({ level, onPause, onEnd }) {
   const lives = useGameStore(s => s.lives)
   const loseLife = useGameStore(s => s.loseLife)
   const setUnlockedLevels = useGameStore(s => s.setUnlockedLevels)
+  const desbloquearNivel = useGameStore(s => s.desbloquearNivel)
   const addRun = useRunHistoryStore(s => s.addRun)
   const difficulty = useGameStore(s => s.difficulty)
 
@@ -106,6 +107,7 @@ export default function Game({ level, onPause, onEnd }) {
   const [showPause, setShowPause] = useState(false)
   const [showJumpscare, setShowJumpscare] = useState(false)
   const [jumpscareSrc, setJumpscareSrc] = useState(null)
+  const jumpscareTimerRef = useRef(null)
 
   // Cargar lista de imágenes de jumpscare una vez
   const jumpscareList = useMemo(() => {
@@ -124,6 +126,16 @@ export default function Game({ level, onPause, onEnd }) {
   const forestAudioUrl = useMemo(() => new URL('../assets/audio/forestaudio.mp3', import.meta.url).href, [])
   const cementeryAudioUrl = useMemo(() => new URL('../assets/audio/cementeryaudio.mp3', import.meta.url).href, [])
   const libraryAudioUrl = useMemo(() => new URL('../assets/audio/libraryaudio.mp3', import.meta.url).href, [])
+
+  // Limpieza del timer de jumpscare al desmontar
+  useEffect(() => {
+    return () => {
+      if (jumpscareTimerRef.current) {
+        try { clearTimeout(jumpscareTimerRef.current) } catch {}
+        jumpscareTimerRef.current = null
+      }
+    }
+  }, [])
 
   useEffect(() => {
     // Detener cualquier música previa
@@ -207,7 +219,8 @@ export default function Game({ level, onPause, onEnd }) {
   // Timer: iniciar al estar listo el nivel
   useEffect(() => {
     if (!ready) return
-    if (status !== 'playing') startLevel(getInitialTimeByDifficulty(difficulty))
+    // Solo autoiniciar cuando el juego está en estado 'idle' (inicio de nivel)
+    if (status === 'idle') startLevel(getInitialTimeByDifficulty(difficulty))
   }, [ready, difficulty, status])
 
   // Intervalo de 1s mientras se juega
@@ -227,58 +240,65 @@ export default function Game({ level, onPause, onEnd }) {
       addScore({ id: crypto.randomUUID?.() || `${Date.now()}-win`, levelId: nivelActual, score, result: 'win', createdAt: new Date().toISOString() })
       const timeSeconds = getInitialTimeByDifficulty(difficulty) - timeRemaining
       addRun({ levelId: nivelActual, score, timeSeconds, difficulty, result: 'win' })
-      // Desbloqueo de niveles por progreso
+      // Desbloqueo jerárquico del siguiente nivel
       if (nivelActual === 'cementery') {
-        setUnlockedLevels(2)
+        desbloquearNivel('forest')
       } else if (nivelActual === 'forest') {
-        setUnlockedLevels(3)
+        desbloquearNivel('library')
       }
     }
   }, [found, targets, ready, status])
 
-  // Derivar derrota al llegar a 0 tiempo con pendientes
+  // Derrota al llegar a 0 por tiempo (sin jumpscare). Si hay jumpscare activo, esperar a que termine.
   useEffect(() => {
     if (status !== 'playing') return
+    if (showJumpscare) return
     if (timeRemaining === 0 && found.length < targets.length) {
-      // Jumpscare si el tiempo restante era bajo al perder por tiempo
-      const THRESHOLD = 30
-      if (THRESHOLD > 0 && jumpscareList.length > 0) {
-        // Al llegar a 0, mostramos si justo antes estaba por debajo del umbral
-        // timeRemaining === 0 implica que veníamos de <= 1; activamos
-        const pick = jumpscareList[Math.floor(Math.random() * jumpscareList.length)]
-        setJumpscareSrc(pick)
-        setShowJumpscare(true)
-        try { console.log('⚡ Activando jumpscare (por tiempo):', timeRemaining, pick) } catch {}
-        setTimeout(() => setShowJumpscare(false), 1500)
-      }
       setLost()
       const score = Math.max(0, Math.round((found.length/Math.max(1,targets.length))*700))
       addScore({ id: crypto.randomUUID?.() || `${Date.now()}-lose`, levelId: nivelActual, score, result: 'lose', createdAt: new Date().toISOString() })
       const timeSeconds = getInitialTimeByDifficulty(difficulty)
       addRun({ levelId: nivelActual, score, timeSeconds, difficulty, result: 'lose' })
     }
-  }, [timeRemaining, status, found, targets])
+  }, [timeRemaining, status, found, targets, showJumpscare])
 
-  // Derrota por quedarse sin vidas
+  // Derrota por quedarse sin vidas (jumpscare si ocurre en <= 30s desde el inicio)
   useEffect(() => {
     if (status !== 'playing') return
     if (lives === 0) {
-      // Jumpscare si se pierde con poco tiempo restante
-      const THRESHOLD = 30
-      if (timeRemaining <= THRESHOLD && jumpscareList.length > 0) {
+      const initialTime = getInitialTimeByDifficulty(difficulty)
+      const elapsed = Math.max(0, initialTime - timeRemaining)
+      if (elapsed <= 30 && jumpscareList.length > 0) {
+        // Si ya se está mostrando jumpscare, no duplicar
+        if (showJumpscare) return
         const pick = jumpscareList[Math.floor(Math.random() * jumpscareList.length)]
         setJumpscareSrc(pick)
         setShowJumpscare(true)
-        try { console.log('⚡ Activando jumpscare (por vidas):', timeRemaining, pick) } catch {}
-        setTimeout(() => setShowJumpscare(false), 1500)
+        try { console.log('⚡ Activando jumpscare (vidas en <=30s):', { elapsed, timeRemaining, pick }) } catch {}
+        if (jumpscareTimerRef.current) {
+          try { clearTimeout(jumpscareTimerRef.current) } catch {}
+        }
+        jumpscareTimerRef.current = setTimeout(() => {
+          setShowJumpscare(false)
+          // Tras el jumpscare, finalizar partida y registrar
+          setLost()
+          const score = Math.max(0, Math.round((found.length/Math.max(1,targets.length))*700))
+          addScore({ id: crypto.randomUUID?.() || `${Date.now()}-lose`, levelId: nivelActual, score, result: 'lose', createdAt: new Date().toISOString() })
+          const timeSeconds = initialTime - timeRemaining
+          addRun({ levelId: nivelActual, score, timeSeconds, difficulty, result: 'lose' })
+          jumpscareTimerRef.current = null
+        }, 3000)
+        return
+      } else {
+        // Muerte por vidas después de 30s: Game Over normal
+        setLost()
+        const score = Math.max(0, Math.round((found.length/Math.max(1,targets.length))*700))
+        addScore({ id: crypto.randomUUID?.() || `${Date.now()}-lose`, levelId: nivelActual, score, result: 'lose', createdAt: new Date().toISOString() })
+        const timeSeconds = initialTime - timeRemaining
+        addRun({ levelId: nivelActual, score, timeSeconds, difficulty, result: 'lose' })
       }
-      setLost()
-      const score = Math.max(0, Math.round((found.length/Math.max(1,targets.length))*700))
-      addScore({ id: crypto.randomUUID?.() || `${Date.now()}-lose`, levelId: nivelActual, score, result: 'lose', createdAt: new Date().toISOString() })
-      const timeSeconds = getInitialTimeByDifficulty(difficulty) - timeRemaining
-      addRun({ levelId: nivelActual, score, timeSeconds, difficulty, result: 'lose' })
     }
-  }, [lives, status])
+  }, [lives, status, showJumpscare])
 
   function fmt(sec){
     const m = Math.floor(sec/60).toString().padStart(2,'0')

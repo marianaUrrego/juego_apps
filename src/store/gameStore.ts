@@ -71,8 +71,14 @@ export const useGameStore = create<GameState>()(persist((set, get) => ({
   scores: [],
   setNivelActual: (level) => set({ nivelActual: level }),
   desbloquearNivel: (level) => {
+    // Normalizar progreso elevando el contador central segun el orden del nivel
+    const orderMap: Record<string, number> = { cementery: 1, forest: 2, library: 3 }
+    const levelOrder = orderMap[level] ?? 1
+    const nextUnlocked = Math.max(get().unlockedLevels, Math.max(1, Math.min(3, levelOrder)))
+    // Mantener lista legacy solo para compatibilidad
     const cur = get().nivelesDesbloqueados
-    if (!cur.includes(level)) set({ nivelesDesbloqueados: [...cur, level] })
+    const list = cur.includes(level) ? cur : [...cur, level]
+    set({ unlockedLevels: nextUnlocked, nivelesDesbloqueados: list })
   },
   setUnlockedLevels: (n) => set({ unlockedLevels: Math.max(1, Math.min(3, n)) }),
   registrarPuntaje: (level, score) => {
