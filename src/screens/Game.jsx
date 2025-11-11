@@ -9,7 +9,6 @@ import { useNavigate } from 'react-router-dom'
 import { useRunHistoryStore } from '../store/runHistoryStore'
 import LivesIndicator from '../components/LivesIndicator'
 import { FaPause } from 'react-icons/fa'
-import Boss03 from '../components/Boss03'
 
 function sample(arr, n) {
   const copy = [...arr]
@@ -59,6 +58,24 @@ export default function Game({ level, onPause, onEnd }) {
 
   const isCementery = level === 'cementery'
 
+  const levelName = useMemo(() => {
+    switch(level){
+      case 'cementery': return 'Cementerio'
+      case 'forest': return 'Bosque'
+      case 'library': return 'Biblioteca'
+      default: return String(level || '')
+    }
+  }, [level])
+
+  const difficultyLabel = useMemo(() => {
+    switch(difficulty){
+      case 'facil': return 'fácil'
+      case 'medio': return 'medio'
+      case 'dificil': return 'difícil'
+      default: return String(difficulty || '')
+    }
+  }, [difficulty])
+
   const bgColor = useMemo(() => {
     switch(level){
       case 'forest': return '#16331f'
@@ -71,6 +88,7 @@ export default function Game({ level, onPause, onEnd }) {
   const [targets, setTargets] = useState([]) // arreglo de objetos colocados elegidos como objetivos
   const [found, setFound] = useState([])     // ids encontrados
   const [placed, setPlaced] = useState([])   // objetos colocados en la matriz: { id, src, pos }
+  const lastPlacedRef = useRef([])
   const [ready, setReady] = useState(false)
   const [seed, setSeed] = useState(0)
   const [showPause, setShowPause] = useState(false)
@@ -102,6 +120,13 @@ export default function Game({ level, onPause, onEnd }) {
     setup()
     return () => { cancelled = true }
   }, [isCementery, seed])
+
+  // Cachear la última matriz no vacía para evitar desapariciones visuales si placed se vacía por error
+  useEffect(() => {
+    if (placed && placed.length > 0) {
+      lastPlacedRef.current = placed
+    }
+  }, [placed])
 
   const bgImage = useMemo(() => isCementery ? getLevelBackground('cementery') : null, [isCementery])
   // Matriz más grande
@@ -215,6 +240,7 @@ export default function Game({ level, onPause, onEnd }) {
         ent.draw(ctx, Math.max(1, canvas.width / 300))
       }
 
+
       raf = requestAnimationFrame(loop)
     }
     raf = requestAnimationFrame(loop)
@@ -245,19 +271,17 @@ export default function Game({ level, onPause, onEnd }) {
             <button className="back-btn" onClick={() => setShowPause(true)} title="Pausa" style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
               <FaPause /> <span>Pausa</span>
             </button>
-            <h2 className="title-md">Escenario: <b>Cementerio</b></h2>
+            <h2 className="title-md" style={{ whiteSpace: 'nowrap' }}>Nivel: <b>{levelName}</b> · Dificultad: <b>{difficultyLabel}</b></h2>
             <div />
           </div>
         </header>
         <div className="container page__body">
           {status === 'playing' && (
-            <div style={{ position: 'absolute', top: 56, right: 'max(12px, 5%)', zIndex: 2, fontWeight: 700, padding: '6px 10px', borderRadius: 8, background: 'rgba(0,0,0,0.25)', border: '1px solid rgba(255,255,255,0.1)', color: timeRemaining <= 10 ? '#ff7575' : 'var(--c-text)' }}>
-              {fmt(timeRemaining)}
-            </div>
-          )}
-          {status === 'playing' && (
-            <div style={{ position: 'absolute', top: 56, left: 'max(12px, 5%)', zIndex: 2, padding: '6px 10px', borderRadius: 8, background: 'rgba(0,0,0,0.25)', border: '1px solid rgba(255,255,255,0.1)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, justifyContent: 'flex-start', padding: '8px 0 6px', marginLeft: 'max(12px, 5%)' }}>
               <LivesIndicator lives={lives} />
+              <span style={{ fontWeight: 700, padding: '6px 10px', borderRadius: 8, background: 'rgba(0,0,0,0.25)', border: '1px solid rgba(255,255,255,0.1)', color: timeRemaining <= 10 ? '#ff7575' : 'var(--c-text)' }}>
+                {fmt(timeRemaining)}
+              </span>
             </div>
           )}
           {!ready ? (
@@ -268,9 +292,7 @@ export default function Game({ level, onPause, onEnd }) {
                 <img src={bgImage} alt="cementery-bg" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
               )}
               <canvas ref={canvasRef} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }} />
-              {/* Boss decorativo: no interactivo (animado arriba a la derecha) */}
-              <Boss03 width={120} />
-              {placed.map((obj) => (
+              {(placed.length > 0 ? placed : lastPlacedRef.current).map((obj) => (
                 <img
                   key={obj.id}
                   src={obj.src}

@@ -5,7 +5,7 @@ import { useGameStore } from '../store/gameStore'
 
 function normalizeLevel(id) {
   if (!id) return null
-  if (id === 'graveyard') return 'cementery'
+  if (id === 'graveyard' || id === 'cemetery') return 'cementery'
   return id
 }
 

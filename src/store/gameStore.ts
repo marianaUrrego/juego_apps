@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
 export type LevelId = 'forest' | 'cementery' | 'library' | string
+
 export type Difficulty = 'facil' | 'medio' | 'dificil'
 
 export function getInitialTimeByDifficulty(difficulty: Difficulty): number {
@@ -95,7 +96,8 @@ export const useGameStore = create<GameState>()(persist((set, get) => ({
   },
   addScore: (entry) => {
     const list = get().scores
-    set({ scores: [entry, ...list].slice(0, 100) })
+    const trimmed = [entry, ...list].sort((a,b) => b.score - a.score).slice(0, 10)
+    set({ scores: trimmed })
     // also update best table
     const prevBest = get().mejorPuntajePorNivel[entry.levelId] ?? 0
     if (entry.score > prevBest) set({ mejorPuntajePorNivel: { ...get().mejorPuntajePorNivel, [entry.levelId]: entry.score } })
