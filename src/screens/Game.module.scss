@@ -50,6 +50,7 @@
   align-items: center;
   justify-content: space-between;
   z-index: 2;
+  pointer-events: none;
 }
 
 .game__hudLeft {
@@ -75,6 +76,7 @@
   background: rgba(0,0,0,0.25);
   border: 1px solid rgba(255,255,255,0.12);
   color: var(--c-text);
+  pointer-events: auto;
 }
 
 .game__timer {

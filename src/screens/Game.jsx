@@ -108,6 +108,8 @@ export default function Game({ level, onPause, onEnd }) {
   const [showJumpscare, setShowJumpscare] = useState(false)
   const [jumpscareSrc, setJumpscareSrc] = useState(null)
   const jumpscareTimerRef = useRef(null)
+  const pauseBtnRef = useRef(null)
+  const [isProcessingHit, setIsProcessingHit] = useState(false)
 
   // Cargar lista de imágenes de jumpscare una vez
   const jumpscareList = useMemo(() => {
@@ -426,8 +428,27 @@ export default function Game({ level, onPause, onEnd }) {
     return () => { cancelled = true; cancelAnimationFrame(raf); ro.disconnect() }
   }, [isForest, ready])
 
-  function handleClick(id) {
+  function getClientPoint(evt){
+    const e = evt?.nativeEvent || evt
+    if (e?.touches && e.touches[0]) return { x: e.touches[0].clientX, y: e.touches[0].clientY }
+    if (e?.changedTouches && e.changedTouches[0]) return { x: e.changedTouches[0].clientX, y: e.changedTouches[0].clientY }
+    return { x: e?.clientX ?? 0, y: e?.clientY ?? 0 }
+  }
+
+  function handleClick(id, evt) {
     if (showPause) return
+    if (isProcessingHit) return
+    // Zona segura alrededor del botón de pausa: ignorar toques/clicks
+    const pt = getClientPoint(evt)
+    const safe = 12
+    const btn = pauseBtnRef.current
+    if (btn) {
+      const r = btn.getBoundingClientRect()
+      const inPauseArea = pt.x >= (r.left - safe) && pt.x <= (r.right + safe) && pt.y >= (r.top - safe) && pt.y <= (r.bottom + safe)
+      if (inPauseArea) return
+    }
+
+    setIsProcessingHit(true)
     const isTarget = targets.some(t => t.id === id)
     if (isTarget && !found.includes(id)) {
       const f = [...found, id]
@@ -440,6 +461,8 @@ export default function Game({ level, onPause, onEnd }) {
       // Click incorrecto: perder vida
       loseLife()
     }
+    // desbloquear entrada tras una breve ventana para evitar doble tap/click
+    setTimeout(() => setIsProcessingHit(false), 250)
   }
 
   if (isCementery || isForest || isLibrary) {
@@ -451,6 +474,7 @@ export default function Game({ level, onPause, onEnd }) {
               <div className={styles.game__hudLeft}>
                 <button
                   className={styles.game__pauseButton}
+                  ref={pauseBtnRef}
                   onClick={() => setShowPause(true)}
                   title="Pausa"
                 >
@@ -480,7 +504,7 @@ export default function Game({ level, onPause, onEnd }) {
                   className={`${styles.game__object} ${found.includes(obj.id) ? styles['game__object--found'] : ''}`}
                   src={obj.src}
                   alt="item"
-                  onClick={() => handleClick(obj.id)}
+                  onPointerDown={(e) => handleClick(obj.id, e)}
                   style={{ left: obj.pos.left, top: obj.pos.top }}
                 />
               ))}
