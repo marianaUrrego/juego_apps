@@ -1,36 +1,43 @@
 /* Estilos locales para Main Menu */
 
 .main {
-  display: flex;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  justify-items: center;
   align-items: center;
-  min-height: calc(100vh - 96px);
-  padding: 24px;
+  min-height: 100vh;
+  padding: clamp(1rem, 3.5vw, 2rem);
+  gap: clamp(1rem, 5vw, 3rem);
 }
 
 .main__wrapper {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 48px;
-  align-items: center;
-  justify-content: center;
-  max-width: 1100px;
-  width: 100%;
-  margin: 0 auto;
+  display: contents;
 }
 
 .main__left {
   display: flex;
   flex-direction: column;
   align-items: center;
-  flex: 1 1 360px;
+  justify-self: center;
 }
 
 .main__menu {
   display: grid;
-  gap: 12px;
+  gap: clamp(.5rem, 1.8vw, .9rem);
   align-content: center;
   justify-items: stretch;
-  flex: 1 1 320px;
-  max-width: 360px;
+  width: 80%;
+  max-width: 400px;
+  justify-self: center;
+}
+
+@media (max-aspect-ratio: 3/4) {
+  .main {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  .main__menu {
+    width: 80%;
+    max-width: 400px;
+  }
 }
