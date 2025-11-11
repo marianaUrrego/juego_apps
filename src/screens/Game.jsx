@@ -8,6 +8,8 @@ import { useGameStore } from '../store/gameStore'
 import { useNavigate } from 'react-router-dom'
 import { useRunHistoryStore } from '../store/runHistoryStore'
 import { useSettingsStore } from '../store/settingsStore'
+import LivesIndicator from '../components/LivesIndicator'
+import { FaPause } from 'react-icons/fa'
 
 function sample(arr, n) {
   const copy = [...arr]
@@ -49,6 +51,9 @@ export default function Game({ level, onPause, onEnd }) {
   const resetLevel = useGameStore(s => s.resetLevel)
   const addScore = useGameStore(s => s.addScore)
   const nivelActual = useGameStore(s => s.nivelActual)
+  const lives = useGameStore(s => s.lives)
+  const loseLife = useGameStore(s => s.loseLife)
+  const setUnlockedLevels = useGameStore(s => s.setUnlockedLevels)
   const addRun = useRunHistoryStore(s => s.addRun)
   const difficulty = useSettingsStore(s => s.difficulty)
 
@@ -124,6 +129,12 @@ export default function Game({ level, onPause, onEnd }) {
       addScore({ id: crypto.randomUUID?.() || `${Date.now()}-win`, levelId: nivelActual, score, result: 'win', createdAt: new Date().toISOString() })
       const timeSeconds = 120 - timeRemaining
       addRun({ levelId: nivelActual, score, timeSeconds, difficulty, result: 'win' })
+      // Desbloqueo de niveles por progreso
+      if (nivelActual === 'cementery') {
+        setUnlockedLevels(2)
+      } else if (nivelActual === 'forest') {
+        setUnlockedLevels(3)
+      }
     }
   }, [found, targets, ready, status])
 
@@ -138,6 +149,18 @@ export default function Game({ level, onPause, onEnd }) {
       addRun({ levelId: nivelActual, score, timeSeconds, difficulty, result: 'lose' })
     }
   }, [timeRemaining, status, found, targets])
+
+  // Derrota por quedarse sin vidas
+  useEffect(() => {
+    if (status !== 'playing') return
+    if (lives === 0) {
+      setLost()
+      const score = Math.max(0, Math.round((found.length/Math.max(1,targets.length))*700))
+      addScore({ id: crypto.randomUUID?.() || `${Date.now()}-lose`, levelId: nivelActual, score, result: 'lose', createdAt: new Date().toISOString() })
+      const timeSeconds = 120 - timeRemaining
+      addRun({ levelId: nivelActual, score, timeSeconds, difficulty, result: 'lose' })
+    }
+  }, [lives, status])
 
   function fmt(sec){
     const m = Math.floor(sec/60).toString().padStart(2,'0')
@@ -205,6 +228,9 @@ export default function Game({ level, onPause, onEnd }) {
         const score = Math.max(0, Math.round((f.length/Math.max(1,targets.length))*700 + timeRemaining*3))
         onEnd && onEnd({ score })
       }
+    } else if (!isTarget) {
+      // Click incorrecto: perder vida
+      loseLife()
     }
   }
 
@@ -213,7 +239,9 @@ export default function Game({ level, onPause, onEnd }) {
       <div className="game" style={{ background: bgColor }}>
         <header className="bar">
           <div className="container">
-            <button className="back-btn" onClick={onPause}>Pausa</button>
+            <button className="back-btn" onClick={onPause} title="Pausa" style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+              <FaPause /> <span>Pausa</span>
+            </button>
             <h2 className="title-md">Escenario: <b>Cementerio</b></h2>
             <div />
           </div>
@@ -222,6 +250,11 @@ export default function Game({ level, onPause, onEnd }) {
           {status === 'playing' && (
             <div style={{ position: 'absolute', top: 56, right: 'max(12px, 5%)', zIndex: 2, fontWeight: 700, padding: '6px 10px', borderRadius: 8, background: 'rgba(0,0,0,0.25)', border: '1px solid rgba(255,255,255,0.1)', color: timeRemaining <= 10 ? '#ff7575' : 'var(--c-text)' }}>
               {fmt(timeRemaining)}
+            </div>
+          )}
+          {status === 'playing' && (
+            <div style={{ position: 'absolute', top: 56, left: 'max(12px, 5%)', zIndex: 2, padding: '6px 10px', borderRadius: 8, background: 'rgba(0,0,0,0.25)', border: '1px solid rgba(255,255,255,0.1)' }}>
+              <LivesIndicator lives={lives} />
             </div>
           )}
           {!ready ? (
@@ -256,7 +289,7 @@ export default function Game({ level, onPause, onEnd }) {
             <div style={{ position: 'fixed', inset: 0, display: 'grid', placeItems: 'center', background: 'rgba(0,0,0,0.5)' }}>
               <div className="panel" style={{ width: 360, textAlign: 'center', display: 'grid', gap: 12 }}>
                 <h3 style={{ margin: 0 }}>Perdiste</h3>
-                <div>Se acabó el tiempo.</div>
+                <div>{timeRemaining === 0 ? 'Se acabó el tiempo.' : 'Te quedaste sin vidas.'}</div>
                 <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
                   <button className="btn-full" onClick={() => { resetLevel(); setSeed(s=>s+1) }}>Reintentar nivel</button>
                   <button className="btn-full" onClick={() => navigate('/')}>Volver al inicio</button>
