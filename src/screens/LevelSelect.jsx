@@ -1,6 +1,7 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useGameStore } from '../store/gameStore'
+import { useRunHistoryStore } from '../store/runHistoryStore'
 
 const ORDERED_LEVELS = [
   { id: 'cementery', name: 'Cementerio', order: 1 },
@@ -12,9 +13,38 @@ export default function LevelSelect() {
   const navigate = useNavigate()
   const setNivelActual = useGameStore(s => s.setNivelActual)
   const setDifficulty = useGameStore(s => s.setDifficulty)
-  const unlockedLevels = useGameStore(s => s.unlockedLevels)
+  const unlockedLevelsCounter = useGameStore(s => s.unlockedLevels)
+  const setUnlockedLevels = useGameStore(s => s.setUnlockedLevels)
+  const runs = useRunHistoryStore(s => s.runs)
   const [open, setOpen] = React.useState(false)
   const [pendingLevel, setPendingLevel] = React.useState(null)
+
+  const hasCleared = React.useMemo(() => {
+    const wonByLevel = runs.reduce((acc, r) => {
+      if (r.result === 'win') acc.add(r.levelId)
+      return acc
+    }, new Set())
+    return (levelId) => wonByLevel.has(levelId)
+  }, [runs])
+
+  // Derivar desbloqueo por reglas:
+  // L1: siempre desbloqueado
+  // L2: desbloqueado si L1 (cementery) completado en alguna dificultad
+  // L3: desbloqueado si L2 (forest) completado en alguna dificultad
+  const isUnlocked = React.useCallback((order, id) => {
+    if (order === 1) return true
+    if (order === 2) return hasCleared('cementery')
+    if (order === 3) return hasCleared('forest')
+    return false
+  }, [hasCleared])
+
+  // Mantener sincronizado el contador global si difiere de lo derivado
+  React.useEffect(() => {
+    const derived = 1 + (hasCleared('cementery') ? 1 : 0) + (hasCleared('forest') ? 1 : 0)
+    if (derived !== unlockedLevelsCounter) {
+      setUnlockedLevels(derived)
+    }
+  }, [hasCleared, unlockedLevelsCounter, setUnlockedLevels])
 
   function handleChooseLevel(levelId){
     // Si está bloqueado, no hace nada (se controla desde el botón)
@@ -45,7 +75,7 @@ export default function LevelSelect() {
       <div className="container page__body">
         <div className="levels-row">
           {ORDERED_LEVELS.map(l => {
-            const unlocked = unlockedLevels >= l.order
+            const unlocked = isUnlocked(l.order, l.id)
             const disabled = !unlocked
             const subtitle = `Nivel ${l.order} · ${unlocked ? 'Desbloqueado' : 'Bloqueado'}`
             return (
