@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react'
 import { useRunHistoryStore } from '../store/runHistoryStore'
+import styles from './Scores.module.scss'
 
 function splitDate(iso){
   const d = new Date(iso)

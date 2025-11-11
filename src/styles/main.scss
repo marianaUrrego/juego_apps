@@ -36,6 +36,20 @@ $bp-sm: 600px;
 
 html, body, #root, #app-root { height: 100%; }
 
+/* Tipografía global consistente */
+body {
+  font-family: $font-family;
+  line-height: 1.5;
+  font-weight: 400;
+}
+
+/* Asegurar herencia de la fuente en elementos comunes */
+h1, h2, h3, h4, h5, h6,
+button,
+input, select, textarea {
+  font-family: inherit;
+}
+
 #root {
   margin: 0;
   padding: 0;

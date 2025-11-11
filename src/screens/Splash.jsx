@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react'
 import logo from '../assets/logo.png'
+import styles from './Splash.module.scss'
 
 export default function Splash({ onDone }) {
   useEffect(() => {

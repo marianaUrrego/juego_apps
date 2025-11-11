@@ -1,4 +1,5 @@
 import React from 'react'
+import styles from './Pause.module.scss'
 
 export default function Pause({ onResume, onQuit }) {
   return (

@@ -2,6 +2,7 @@ import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useGameStore } from '../store/gameStore'
 import { useRunHistoryStore } from '../store/runHistoryStore'
+import styles from './LevelSelect.module.scss'
 
 const ORDERED_LEVELS = [
   { id: 'cementery', name: 'Cementerio', order: 1 },

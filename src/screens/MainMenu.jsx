@@ -3,6 +3,7 @@ import logo from '../assets/logo.png'
 import { useNavigate } from 'react-router-dom'
 import BrandBlock from '../components/BrandBlock'
 import { FaTrophy, FaInfoCircle, FaCog } from 'react-icons/fa'
+import styles from './MainMenu.module.scss'
 
 export default function MainMenu() {
   const navigate = useNavigate()

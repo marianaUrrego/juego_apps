@@ -1,5 +1,6 @@
 import React from 'react'
 import { useSettingsStore } from '../store/settingsStore'
+import styles from './Settings.module.scss'
 
 export default function Settings({ onBack }) {
   const music = useSettingsStore(s => s.volumenMusica)

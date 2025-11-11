@@ -1,6 +1,7 @@
 import React from 'react'
 import logo from '../assets/logo.png'
 import BrandBlock from '../components/BrandBlock'
+import styles from './Credits.module.scss'
 
 export default function Credits({ onBack }) {
   return (
