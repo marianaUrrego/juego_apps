@@ -12,12 +12,6 @@ import { useSettingsStore } from '../store/settingsStore'
 import LivesIndicator from '../components/LivesIndicator'
 import { FaPause } from 'react-icons/fa'
 import styles from './Game.module.scss'
-// import { bearConfig } from '../config/sprites/forest/bearConfig'
-// import { trollConfig } from '../config/sprites/forest/trollConfig'
-// import { golemConfig } from '../config/sprites/forest/golemConfig'
-// import { fairyConfig } from '../config/sprites/forest/fairyConfig'
-// import { entConfig } from '../config/sprites/forest/entConfig'
-// import { rangerConfig } from '../config/sprites/forest/rangerConfig'
 
 function sample(arr, n) {
   const copy = [...arr]
@@ -361,72 +355,7 @@ export default function Game({ level, onPause, onEnd }) {
     return () => { cancelAnimationFrame(raf); ro.disconnect() }
   }, [isCementery, ready])
 
-  // Canvas para bosque: personajes quietos en animación idle (Bear, Troll, Golem, Fairy, Ent, Ranger)
-  useEffect(() => {
-    if (!isForest || !ready) return
-    const canvas = canvasRef.current
-    const ctx = canvas?.getContext?.('2d')
-    if (!canvas || !ctx) return
-
-    function fit() {
-      const parent = canvas.parentElement
-      if (!parent) return
-      const rect = parent.getBoundingClientRect()
-      canvas.width = Math.floor(rect.width)
-      canvas.height = Math.floor(rect.height)
-    }
-    fit()
-    const ro = new ResizeObserver(fit)
-    ro.observe(canvas.parentElement)
-
-    let raf = 0
-    let cancelled = false
-    ;(async () => {
-      // Orden específico: Golem, Orco(Troll), Hada, Oso, Árbol(Ent)
-      const cfgs = [golemConfig, trollConfig, fairyConfig, bearConfig, entConfig]
-      const urls = cfgs.map(c => c.imagePath)
-      await preloadImages(urls)
-      if (cancelled) return
-
-      // Posiciones relativas (x,y en 0..1) para replicar la referencia
-      const idlePositions = [
-        { x: 0.09, y: 0.90 }, // Golem: esquina inferior izquierda
-        { x: 0.20, y: 0.90 }, // Orco (Troll): a la derecha del golem
-        { x: 0.50, y: 0.42 }, // Hada: centrada en el aire
-        { x: 0.80, y: 0.92 }, // Oso: esquina inferior derecha
-        { x: 0.88, y: 0.90 }, // Árbol (Ent): junto al oso
-      ]
-
-      // Mapea cada config a una posición fija; mantiene idle sin desplazamiento
-      const orderedCfgs = cfgs
-      const entities = orderedCfgs.map((cfg, i) => {
-        const pos = idlePositions[i]
-        const x = canvas.width * pos.x
-        const y = canvas.height * pos.y
-        const ent = createEntityFromConfig(cfg, x, y)
-        return { ent, x, y }
-      })
-
-      let last = performance.now()
-      function loop(ts){
-        const dt = ts - last; last = ts
-        ctx.clearRect(0,0,canvas.width,canvas.height)
-        const scale = Math.max(1, canvas.width / 300)
-        for (const state of entities) {
-          const { ent } = state
-          // No input de movimiento: se queda en idle
-          ent.update(dt, {})
-          ent.x = state.x
-          ent.y = state.y
-          ent.draw(ctx, scale)
-        }
-        raf = requestAnimationFrame(loop)
-      }
-      raf = requestAnimationFrame(loop)
-    })()
-
-    return () => { cancelled = true; cancelAnimationFrame(raf); ro.disconnect() }
-  }, [isForest, ready])
+  
 
   function getClientPoint(evt){
     const e = evt?.nativeEvent || evt
@@ -469,27 +398,6 @@ export default function Game({ level, onPause, onEnd }) {
     return (
       <div className={styles.game} style={{ background: bgColor }}>
         <div className={styles.game__body}>
-          {status === 'playing' && (
-            <div className={styles.game__hud}>
-              <div className={styles.game__hudLeft}>
-                <button
-                  className={styles.game__pauseButton}
-                  ref={pauseBtnRef}
-                  onClick={() => setShowPause(true)}
-                  title="Pausa"
-                >
-                  <FaPause />
-                  <span>Pausa</span>
-                </button>
-              </div>
-              <div className={styles.game__hudRight}>
-                <LivesIndicator lives={lives} />
-                <span className={`${styles.game__timer} ${timeRemaining <= 10 ? styles['game__timer--danger'] : ''}`}>
-                  {fmt(timeRemaining)}
-                </span>
-              </div>
-            </div>
-          )}
           {!ready ? (
             <div className={styles.game__panel}>Cargando recursos...</div>
           ) : (
@@ -519,6 +427,25 @@ export default function Game({ level, onPause, onEnd }) {
               ))}
             </div>
           )}
+          <div className={styles.game__hud}>
+            <div className={styles.game__hudLeft}>
+              <button
+                className={styles.game__pauseButton}
+                ref={pauseBtnRef}
+                onClick={() => setShowPause(true)}
+                title="Pausa"
+              >
+                <FaPause />
+                <span>Pausa</span>
+              </button>
+            </div>
+            <div className={styles.game__hudRight}>
+              <LivesIndicator lives={lives} />
+              <span className={`${styles.game__timer} ${timeRemaining <= 10 ? styles['game__timer--danger'] : ''}`}>
+                {fmt(timeRemaining)}
+              </span>
+            </div>
+          </div>
           {showJumpscare && jumpscareSrc && createPortal(
             (() => { try { console.log('🧠 Activando jumpscare overlay', timeRemaining, showJumpscare) } catch {} ; return (
               <div className={styles.game__jumpscare}>
