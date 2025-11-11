@@ -24,13 +24,11 @@ export default function Scores({ onBack }) {
 
   return (
     <div className={`page ${styles.scores}`}>
-      <header className="bar">
-        <div className={`container ${styles.scores__headerInner}`}>
-          <div className={styles.scores__headerLeft}>
-            <button className="back-btn" onClick={onBack}>{'\u2190'}</button>
-          </div>
-          <h2 className={`title-md ${styles.scores__title}`}>Puntajes</h2>
-          <div className={styles.scores__headerRight} aria-hidden />
+      <header className="bar scores-header">
+        <div className={`container`}>
+          <div className="scores-header__back"><button className="back-btn" onClick={onBack}>{'\u2190'}</button></div>
+          <h2 className={`title-md scores-header__title ${styles.scores__title}`}>Puntajes</h2>
+          <div className="scores-header__spacer" aria-hidden />
         </div>
       </header>
 
